@@ -188,7 +188,7 @@
         .tabla-horizontal td:first-child {
             position: sticky;
             left: 0;
-            background: #ffffff;
+            background: #ffffff !important;
             z-index: 5;
             font-weight: bold;
             box-shadow: 3px 0 6px rgba(0,0,0,0.06);
@@ -198,7 +198,15 @@
         }
         .tabla-horizontal th:first-child {
             z-index: 12;
-            background: #f8fafc;
+            background: #f8fafc !important;
+        }
+
+        /* Estilos para Resaltar Fines de Semana */
+        .celda-sabado {
+            background-color: #ffedd5 !important; /* Naranja suave */
+        }
+        .celda-domingo {
+            background-color: #fef9c3 !important; /* Amarillo suave */
         }
 
         .celda-franco {
@@ -263,15 +271,8 @@
 
     <div class="section-title">Paso 1: Marcar FRANCOS día por día</div>
     <div class="scroll-container">
-        <table>
-            <thead>
-                <tr>
-                    <th style="text-align: left; padding-left: 15px;">Día</th>
-                    <th>Pace</th>
-                    <th>Videla</th>
-                    <th>Mansilla</th>
-                    <th>Carrizo</th>
-                </tr>
+        <table class="tabla-horizontal">
+            <thead id="tabla-francos-header">
             </thead>
             <tbody id="tabla-francos-body">
             </tbody>
@@ -329,27 +330,49 @@
     function generarDias() {
         const mesIdx = parseInt(document.getElementById('mesSelector').value);
         const totalDias = diasDelMes[mesIdx];
+        const thead = document.getElementById('tabla-francos-header');
         const tbody = document.getElementById('tabla-francos-body');
-        tbody.innerHTML = '';
         
+        // 1. Generar Encabezado de la tabla (Días del mes)
+        let headerHtml = `<tr><th>Operario</th>`;
         for (let d = 1; d <= totalDias; d++) {
             let textoDia = obtenerDiaTexto(d, mesIdx);
+            let fecha = new Date(2026, mesIdx, d);
+            let dayOfWeek = fecha.getDay();
+            let claseFinDeSemana = '';
             
-            let pPace = localStorage.getItem(`franco-Pace-${mesIdx}-${d}`) === 'true';
-            let pVidela = localStorage.getItem(`franco-Videla-${mesIdx}-${d}`) === 'true';
-            let pMansilla = localStorage.getItem(`franco-Mansilla-${mesIdx}-${d}`) === 'true';
-            let pCarrizo = localStorage.getItem(`franco-Carrizo-${mesIdx}-${d}`) === 'true';
-
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="text-align: left; padding-left: 15px;"><strong>${textoDia}</strong></td>
-                <td><input type="checkbox" id="franco-Pace-${d}" ${pPace ? 'checked' : ''} onchange="guardarEstadoFranco('Pace', ${d}, this.checked)"></td>
-                <td><input type="checkbox" id="franco-Videla-${d}" ${pVidela ? 'checked' : ''} onchange="guardarEstadoFranco('Videla', ${d}, this.checked)"></td>
-                <td><input type="checkbox" id="franco-Mansilla-${d}" ${pMansilla ? 'checked' : ''} onchange="guardarEstadoFranco('Mansilla', ${d}, this.checked)"></td>
-                <td><input type="checkbox" id="franco-Carrizo-${d}" ${pCarrizo ? 'checked' : ''} onchange="guardarEstadoFranco('Carrizo', ${d}, this.checked)"></td>
-            `;
-            tbody.appendChild(tr);
+            if (dayOfWeek === 0) claseFinDeSemana = 'class="celda-domingo"';
+            else if (dayOfWeek === 6) claseFinDeSemana = 'class="celda-sabado"';
+            
+            headerHtml += `<th ${claseFinDeSemana}>${textoDia}</th>`;
         }
+        headerHtml += `</tr>`;
+        thead.innerHTML = headerHtml;
+        
+        // 2. Generar las Filas (Nombres de operarios y sus checkboxes)
+        tbody.innerHTML = '';
+        personal.forEach(p => {
+            let tr = document.createElement('tr');
+            let rowHtml = `<td><strong>${p.nombre}</strong></td>`;
+            
+            for (let d = 1; d <= totalDias; d++) {
+                let pPace = localStorage.getItem(`franco-${p.nombre}-${mesIdx}-${d}`) === 'true';
+                let fecha = new Date(2026, mesIdx, d);
+                let dayOfWeek = fecha.getDay();
+                let claseFinDeSemana = '';
+                
+                if (dayOfWeek === 0) claseFinDeSemana = 'class="celda-domingo"';
+                else if (dayOfWeek === 6) claseFinDeSemana = 'class="celda-sabado"';
+                
+                rowHtml += `
+                    <td ${claseFinDeSemana}>
+                        <input type="checkbox" id="franco-${p.nombre}-${d}" ${pPace ? 'checked' : ''} onchange="guardarEstadoFranco('${p.nombre}', ${d}, this.checked)">
+                    </td>`;
+            }
+            tr.innerHTML = rowHtml;
+            tbody.appendChild(tr);
+        });
+
         document.getElementById('bloque-resultados').innerHTML = '';
         resultadosMesGlobal = [];
     }
@@ -373,7 +396,6 @@
         }
     }
 
-    // FUNCIÓN DE RASTREO GENÉRICA: Busca el domingo de la semana anterior para cualquier operario
     function operarioFrancoDomingoAnterior(nombre, diaActual, mesIdx) {
         let fechaActual = new Date(2026, mesIdx, diaActual);
         let diaSemana = fechaActual.getDay(); 
@@ -424,26 +446,20 @@
 
             let todasLasCombinaciones = permutar(disponibles);
             
-            // ─── SOLUCIÓN AL EFECTO MONOTONÍA ──────────────────────────────────
-            // Mezclamos las combinaciones usando el día como semilla matemática.
-            // Así evitamos que Carrizo o Mansilla se queden fijos siempre en días comunes.
             let seed = d;
             todasLasCombinaciones.sort(() => {
                 seed = (seed * 9301 + 49297) % 233280;
                 return (seed / 233280) - 0.5;
             });
-            // ───────────────────────────────────────────────────────────────────
 
             let combinacionValida = null;
 
-            // Consultamos las condiciones para ambos operarios
             let obligaNocheCarrizo = operarioFrancoDomingoAnterior('Carrizo', d, mesIdx);
             let obligaNocheMansilla = operarioFrancoDomingoAnterior('Mansilla', d, mesIdx);
 
             for (let comb of todasLasCombinaciones) {
                 let esValida = true;
                 
-                // Restricciones horarias estándar (Pace y Videla)
                 for (let i = 0; i < turnosConfig.length; i++) {
                     if (turnosConfig[i].finLineal > comb[i].maxHoraLineal) {
                         esValida = false;
@@ -451,7 +467,6 @@
                     }
                 }
                 
-                // Control Condición CARRIZO
                 if (esValida && obligaNocheCarrizo) {
                     let pos = comb.findIndex(p => p.nombre === 'Carrizo');
                     if (pos !== -1 && pos !== (turnosConfig.length - 1)) {
@@ -459,7 +474,6 @@
                     }
                 }
 
-                // Control Condición MANSILLA
                 if (esValida && obligaNocheMansilla) {
                     let pos = comb.findIndex(p => p.nombre === 'Mansilla');
                     if (pos !== -1 && pos !== (turnosConfig.length - 1)) {
@@ -632,19 +646,24 @@
     };
 
     if ('serviceWorker' in navigator) {
-      const swCode = `
-        const CACHE = 'turnos-v4';
-        self.addEventListener('install', e => {
-          e.waitUntil(caches.open(CACHE).then(c => c.addAll(['.'])));
-        });
-        self.addEventListener('fetch', e => {
-          e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-        });
-      `;
-      const swBlob = new Blob([swCode], {type: 'application/javascript'});
-      const swUrl = URL.createObjectURL(swCode);
-      navigator.serviceWorker.register(swUrl).catch(() => {});
+      try {
+        const swCode = `
+          const CACHE = 'turnos-v4';
+          self.addEventListener('install', e => {
+            e.waitUntil(caches.open(CACHE).then(c => c.addAll(['.'])));
+          });
+          self.addEventListener('fetch', e => {
+            e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+          });
+        `;
+        const swBlob = new Blob([swCode], {type: 'application/javascript'});
+        const swUrl = URL.createObjectURL(swBlob);
+        navigator.serviceWorker.register(swUrl).catch(() => {});
+      } catch (e) {
+        console.log("El navegador restringe Service Workers desde Blobs inline.");
+      }
     }
 </script>
+
 </body>
 </html>
