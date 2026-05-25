@@ -1,4 +1,11 @@
--mobile-web-app-status-bar-style" content="black-translucent"/>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+    <meta name="theme-color" content="#2563eb"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
     <meta name="apple-mobile-web-app-title" content="Turnos"/>
     <title>Organizador de Turnos Mensual</title>
     
@@ -94,7 +101,7 @@
         .scroll-container {
             max-height: 350px;
             overflow-y: auto;
-            overflow-x: auto; /* Habilita scroll horizontal */
+            overflow-x: auto;
             border: 1px solid #e2e8f0;
             border-radius: 10px;
             margin-bottom: 25px;
@@ -169,16 +176,14 @@
             margin-top: 20px;
         }
         
-        /* Estilos específicos para la planilla horizontal de resultados */
         .tabla-horizontal {
-            width: auto; /* Permite que la tabla se estire horizontalmente */
+            width: auto;
         }
         .tabla-horizontal th, .tabla-horizontal td {
-            white-space: nowrap; /* Evita que los horarios se rompan en dos renglones */
+            white-space: nowrap;
             padding: 12px 15px;
             min-width: 90px;
         }
-        /* Bloquea la primera columna (Operarios) a la izquierda */
         .tabla-horizontal th:first-child, 
         .tabla-horizontal td:first-child {
             position: sticky;
@@ -234,7 +239,8 @@
     
     <div class="info-box">
         <strong>Reglas del sistema (Lógica de Tiempo Lineal):</strong> Jornada de 06:00 a 06:00 del día siguiente.<br>
-        • Pace: Hasta las 18:00 hs. | • Videla: Hasta las 22:00 hs. | • Mansilla y Carrizo: Sin restricciones.
+        • Pace: Hasta las 18:00 hs. | • Videla: Hasta las 22:00 hs. | • Mansilla y Carrizo: Sin restricciones.<br>
+        • <b>Regla de Alternancia Noche:</b> Si Mansilla o Carrizo tienen franco un Domingo, la semana posterior van obligatorio al turno noche (salida a las 06:00).
     </div>
 
     <div class="control-panel">
@@ -293,7 +299,6 @@
 
     let resultadosMesGlobal = [];
 
-    // Devuelve un formato ultra prolijo y alineado: "Lun 01", "Mar 15", etc.
     function obtenerDiaTexto(d, mesIdx) {
         const fecha = new Date(2026, mesIdx, d);
         const nombreDia = nombresDiasShort[fecha.getDay()];
@@ -368,6 +373,22 @@
         }
     }
 
+    // FUNCIÓN DE RASTREO GENÉRICA: Busca el domingo de la semana anterior para cualquier operario
+    function operarioFrancoDomingoAnterior(nombre, diaActual, mesIdx) {
+        let fechaActual = new Date(2026, mesIdx, diaActual);
+        let diaSemana = fechaActual.getDay(); 
+        
+        let diasDeDiferencia = (diaSemana === 0) ? 7 : diaSemana;
+        let domingoAnterior = new Date(2026, mesIdx, diaActual - diasDeDiferencia);
+        
+        if (domingoAnterior.getFullYear() !== 2026) return false;
+
+        let domMes = domingoAnterior.getMonth();
+        let domDia = domingoAnterior.getDate();
+
+        return localStorage.getItem(`franco-${nombre}-${domMes}-${domDia}`) === 'true';
+    }
+
     function calcularMescompleto() {
         const mesIdx = parseInt(document.getElementById('mesSelector').value);
         const totalDias = diasDelMes[mesIdx];
@@ -402,16 +423,50 @@
             }
 
             let todasLasCombinaciones = permutar(disponibles);
+            
+            // ─── SOLUCIÓN AL EFECTO MONOTONÍA ──────────────────────────────────
+            // Mezclamos las combinaciones usando el día como semilla matemática.
+            // Así evitamos que Carrizo o Mansilla se queden fijos siempre en días comunes.
+            let seed = d;
+            todasLasCombinaciones.sort(() => {
+                seed = (seed * 9301 + 49297) % 233280;
+                return (seed / 233280) - 0.5;
+            });
+            // ───────────────────────────────────────────────────────────────────
+
             let combinacionValida = null;
+
+            // Consultamos las condiciones para ambos operarios
+            let obligaNocheCarrizo = operarioFrancoDomingoAnterior('Carrizo', d, mesIdx);
+            let obligaNocheMansilla = operarioFrancoDomingoAnterior('Mansilla', d, mesIdx);
 
             for (let comb of todasLasCombinaciones) {
                 let esValida = true;
+                
+                // Restricciones horarias estándar (Pace y Videla)
                 for (let i = 0; i < turnosConfig.length; i++) {
                     if (turnosConfig[i].finLineal > comb[i].maxHoraLineal) {
                         esValida = false;
                         break;
                     }
                 }
+                
+                // Control Condición CARRIZO
+                if (esValida && obligaNocheCarrizo) {
+                    let pos = comb.findIndex(p => p.nombre === 'Carrizo');
+                    if (pos !== -1 && pos !== (turnosConfig.length - 1)) {
+                        esValida = false; 
+                    }
+                }
+
+                // Control Condición MANSILLA
+                if (esValida && obligaNocheMansilla) {
+                    let pos = comb.findIndex(p => p.nombre === 'Mansilla');
+                    if (pos !== -1 && pos !== (turnosConfig.length - 1)) {
+                        esValida = false; 
+                    }
+                }
+
                 if (esValida) {
                     combinacionValida = comb;
                     break;
@@ -451,7 +506,6 @@
                             <th>Operario</th>
         `;
 
-        // Generar Días en las Columnas de la cabecera
         resultadosMesGlobal.forEach(r => {
             let textoDia = obtenerDiaTexto(r.dia, mesIdx);
             html += `<th>${textoDia}</th>`;
@@ -463,7 +517,6 @@
                     <tbody>
         `;
 
-        // Generar Operarios en las Filas
         personal.forEach(p => {
             html += `<tr><td><strong>${p.nombre}</strong></td>`;
             resultadosMesGlobal.forEach(r => {
@@ -479,7 +532,7 @@
         if (conErrores) {
             html += `
                 <div class="alert-error">
-                    <strong>Atención:</strong> Se detectaron días con problemas (marcados en rojo). Esto ocurre si dejás a menos de 2 personas trabajando o si las restricciones horarias no permiten cubrir la noche de forma segura.
+                    <strong>Atención:</strong> Se detectaron días con problemas (marcados en rojo). Esto ocurre si dejás a menos de 2 personas trabajando, si las restricciones horarias fallan, o si obligaste a Mansilla y Carrizo a ir a la noche el mismo día (un solo turno noche disponible).
                 </div>`;
         }
 
@@ -495,14 +548,12 @@
         
         let csvRows = [];
         
-        // Fila 1: Encabezados (Operario, Dia 1, Dia 2...)
         let encabezados = ["Operario"];
         resultadosMesGlobal.forEach(r => {
             encabezados.push(obtenerDiaTexto(r.dia, mesIdx));
         });
         csvRows.push(encabezados.map(h => `"${h}"`).join(","));
 
-        // Filas siguientes: Datos por operario
         personal.forEach(p => {
             let fila = [p.nombre];
             resultadosMesGlobal.forEach(r => {
@@ -549,14 +600,12 @@
         
         const mesIdx = parseInt(document.getElementById('mesSelector').value);
         
-        // Cabecera horizontal
         let encabezados = ["Operario"];
         resultadosMesGlobal.forEach(r => {
             encabezados.push(obtenerDiaTexto(r.dia, mesIdx));
         });
         let textoCopiar = encabezados.join("\t") + "\n";
 
-        // Cuerpo horizontal
         personal.forEach(p => {
             let fila = [p.nombre];
             resultadosMesGlobal.forEach(r => {
@@ -566,7 +615,7 @@
         });
 
         navigator.clipboard.writeText(textoCopiar).then(() => {
-            alert("¡Copiado horizontal con éxito!\n\nAhora podés ir a Google Sheets o Excel, mantener apretada una celda y seleccionar 'Pegar'. Quedará ordenada con los operarios en filas y días en columnas.");
+            alert("¡Copiado horizontal con éxito!\n\nAhora podés ir a Google Sheets o Excel y pegar directamente.");
         }).catch(() => {
             alert("No se pudo copiar automáticamente.");
         });
@@ -577,15 +626,14 @@
         if (mesGuardado !== null) {
             document.getElementById('mesSelector').value = mesGuardado;
         } else {
-            document.getElementById('mesSelector').value = "4"; // Mayo por defecto
+            document.getElementById('mesSelector').value = "4";
         }
         generarDias();
     };
 
-    // ─── Service Worker (Soporte Offline) ───────────────────────────────────────
     if ('serviceWorker' in navigator) {
       const swCode = `
-        const CACHE = 'turnos-v2';
+        const CACHE = 'turnos-v4';
         self.addEventListener('install', e => {
           e.waitUntil(caches.open(CACHE).then(c => c.addAll(['.'])));
         });
@@ -594,11 +642,10 @@
         });
       `;
       const swBlob = new Blob([swCode], {type: 'application/javascript'});
-      const swUrl = URL.createObjectURL(swBlob);
+      const swUrl = URL.createObjectURL(swCode);
       navigator.serviceWorker.register(swUrl).catch(() => {});
     }
 </script>
 
 </body>
 </html>
-
