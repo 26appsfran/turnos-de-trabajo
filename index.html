@@ -3,36 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-    <meta name="theme-color" content="#2563eb"/>
-    <meta name="apple-mobile-web-app-capable" content="yes"/>
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-    <meta name="apple-mobile-web-app-title" content="Turnos"/>
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Turnos">
     <title>Organizador de Turnos Mensual</title>
-    
+
     <script>
     const manifest = {
-      name: "Planificador de Turnos",
-      short_name: "Turnos",
-      start_url: ".",
-      display: "standalone",
-      background_color: "#f1f5f9",
-      theme_color: "#2563eb",
-      icons: [{ src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text y='.9em' font-size='80' x='10'>📅</text></svg>", sizes: "any", type: "image/svg+xml" }]
+        name: "Planificador de Turnos",
+        short_name: "Turnos",
+        start_url: ".",
+        display: "standalone",
+        background_color: "#f1f5f9",
+        theme_color: "#2563eb",
+        icons: [{
+            src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text y='.9em' font-size='80' x='10'>📅</text></svg>",
+            sizes: "any",
+            type: "image/svg+xml"
+        }]
     };
-    const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('link');
-    link.rel = 'manifest';
-    link.href = url;
-    document.head.appendChild(link);
+
+    const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+    const manifestUrl = URL.createObjectURL(blob);
+    const manifestLink = document.createElement("link");
+    manifestLink.rel = "manifest";
+    manifestLink.href = manifestUrl;
+    document.head.appendChild(manifestLink);
     </script>
 
     <style>
         * {
             box-sizing: border-box;
         }
+
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: "Segoe UI", Arial, sans-serif;
             background-color: #f1f5f9;
             color: #1e293b;
             margin: 0;
@@ -40,20 +46,23 @@
             display: flex;
             justify-content: center;
         }
+
         .container {
             width: 100%;
             max-width: 800px;
             background: white;
             padding: 20px;
             border-radius: 16px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .05);
         }
+
         h1 {
             font-size: 22px;
             margin-top: 0;
             text-align: center;
             color: #0f172a;
         }
+
         .info-box {
             background-color: #eff6ff;
             border-left: 4px solid #3b82f6;
@@ -64,14 +73,16 @@
             color: #1e40af;
             line-height: 1.5;
         }
+
         .section-title {
             font-size: 14px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: .05em;
             color: #64748b;
-            margin-bottom: 12px;
+            margin: 20px 0 12px;
         }
+
         .control-panel {
             display: flex;
             flex-direction: column;
@@ -82,11 +93,13 @@
             border-radius: 10px;
             border: 1px solid #e2e8f0;
         }
+
         label.select-label {
             font-weight: 600;
             color: #334155;
             font-size: 14px;
         }
+
         select {
             padding: 12px;
             border-radius: 8px;
@@ -98,27 +111,30 @@
             cursor: pointer;
             width: 100%;
         }
+
         .scroll-container {
             max-height: 350px;
-            overflow-y: auto;
-            overflow-x: auto;
+            overflow: auto;
             border: 1px solid #e2e8f0;
             border-radius: 10px;
             margin-bottom: 25px;
             background: #fff;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, .02);
             -webkit-overflow-scrolling: touch;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
             text-align: center;
         }
+
         th, td {
             padding: 12px 10px;
             border-bottom: 1px solid #e2e8f0;
         }
+
         th {
             background-color: #f8fafc;
             color: #475569;
@@ -128,13 +144,16 @@
             z-index: 10;
             box-shadow: 0 1px 0 #e2e8f0;
         }
+
         tr:hover {
             background-color: #f8fafc;
         }
+
         input[type="checkbox"] {
             transform: scale(1.3);
             cursor: pointer;
         }
+
         button {
             width: 100%;
             background: #2563eb;
@@ -145,57 +164,69 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background .2s;
             margin-bottom: 12px;
             -webkit-tap-highlight-color: transparent;
         }
+
         button:hover {
             background: #1d4ed8;
         }
+
         .btn-exportar {
             background: #16a34a;
         }
+
         .btn-exportar:hover {
             background: #15803d;
         }
+
         .btn-copiar {
             background: #0284c7;
         }
+
         .btn-copiar:hover {
             background: #0369a1;
         }
+
         .btn-limpiar {
             background: #64748b;
             font-size: 14px;
             padding: 10px;
         }
+
         .btn-limpiar:hover {
             background: #475569;
         }
+
         .resultados {
             margin-top: 20px;
         }
-        
+
         .tabla-horizontal {
             width: auto;
         }
-        .tabla-horizontal th, .tabla-horizontal td {
+
+        .tabla-horizontal th,
+        .tabla-horizontal td {
             white-space: nowrap;
             padding: 12px 15px;
             min-width: 90px;
         }
-        .tabla-horizontal th:first-child, 
+
+        .tabla-horizontal th:first-child,
         .tabla-horizontal td:first-child {
             position: sticky;
             left: 0;
-            background: #ffffff !important;
+            background: #fff !important;
             z-index: 5;
             font-weight: bold;
-            box-shadow: 3px 0 6px rgba(0,0,0,0.06);
+            box-shadow: 3px 0 6px rgba(0, 0, 0, .06);
             border-right: 2px solid #e2e8f0;
             min-width: 110px;
             text-align: left;
         }
+
         .tabla-horizontal th:first-child {
             z-index: 12;
             background: #f8fafc !important;
@@ -204,8 +235,28 @@
         .celda-sabado {
             background-color: #ffedd5 !important;
         }
-        .celda-domingo {
+
+        .celda-domingo,
+        .celda-feriado {
             background-color: #fef9c3 !important;
+        }
+
+        .dia-marcable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .dia-marcable:hover {
+            filter: brightness(.96);
+            outline: 2px solid #eab308;
+            outline-offset: -2px;
+        }
+
+        .marca-feriado {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            color: #854d0e;
         }
 
         .celda-franco {
@@ -214,18 +265,21 @@
             font-size: 12px;
             font-weight: 500;
         }
+
         .celda-error {
             color: #dc2626;
             background-color: #fef2f2;
             font-weight: 700;
             font-size: 12px;
         }
+
         .celda-turno {
             color: #15803d;
             background-color: #f0fdf4;
             font-weight: 600;
             font-size: 13px;
         }
+
         .alert-error {
             background: #fef2f2;
             border: 1px solid #fca5a5;
@@ -237,23 +291,93 @@
             line-height: 1.5;
             margin-top: 15px;
         }
+
+        .avisos-panel {
+            border: 1px solid #fcd34d;
+            background: #fffbeb;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 18px 0 24px;
+        }
+
+        .avisos-panel h2 {
+            font-size: 17px;
+            margin: 0 0 8px;
+            color: #92400e;
+        }
+
+        .avisos-intro {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #78350f;
+            margin: 0 0 12px;
+        }
+
+        .aviso-item {
+            background: #fff;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            padding: 11px;
+            margin-top: 8px;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .aviso-item strong {
+            color: #92400e;
+        }
+
+        .aviso-vacio {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        .aviso-nota {
+            font-size: 11px;
+            color: #78350f;
+            margin-top: 12px;
+            line-height: 1.45;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+
+            .container {
+                padding: 13px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
-<body>
 
+<body>
 <div class="container">
+
     <h1>Planificador Mensual de Turnos</h1>
-    
+
     <div class="info-box">
-        <strong>Reglas del sistema (Lógica de Tiempo Lineal):</strong> Jornada de 06:00 a 06:00 del día siguiente.<br>
+        <strong>Reglas del sistema (Lógica de Tiempo Lineal):</strong>
+        Jornada de 06:00 a 06:00 del día siguiente.<br>
         • <b>Pace:</b> Hasta las 18:00 hs. Siempre que esté disponible inicia obligatorio a las 06:00 hs.<br>
         • <b>Videla:</b> Hasta las 22:00 hs. Si HOY entra a las 06:00 hs, AYER salió a las 18:00 hs máximo.<br>
         • <b>Mansilla y Carrizo:</b> Sin restricciones horarias.<br>
-        • <b>Regla de Alternancia Noche:</b> Si Mansilla o Carrizo tienen franco un Domingo, la semana posterior van obligatorio al turno noche (salida a las 06:00).
+        • <b>Regla de Alternancia Noche:</b> Si Mansilla o Carrizo tienen franco un domingo, la semana posterior van obligatorio al turno noche (salida a las 06:00).
     </div>
 
     <div class="control-panel">
-        <label class="select-label" for="mesSelector">Seleccionar Mes de Planificación:</label>
+        <label class="select-label" for="mesSelector">
+            Seleccionar Mes de Planificación:
+        </label>
+
         <select id="mesSelector" onchange="cambiarMes()">
             <option value="0">Enero</option>
             <option value="1">Febrero</option>
@@ -271,219 +395,329 @@
     </div>
 
     <div class="section-title">Paso 1: Marcar FRANCOS día por día</div>
+
+    <p style="font-size:12px;color:#64748b;margin-top:-5px;">
+        Marcá los francos con las casillas. Para marcar un feriado nacional, tocá el encabezado del día.
+        Volvé a tocarlo para quitar la marca. Los domingos ya aparecen en amarillo.
+    </p>
+
     <div class="scroll-container">
         <table class="tabla-horizontal">
-            <thead id="tabla-francos-header">
-            </thead>
-            <tbody id="tabla-francos-body">
-            </tbody>
+            <thead id="tabla-francos-header"></thead>
+            <tbody id="tabla-francos-body"></tbody>
         </table>
     </div>
 
-    <button onclick="calcularMescompleto()">Procesar Mes y Calcular Turnos</button>
-    <button onclick="limpiarFrancosDelMes()" class="btn-limpiar">🔄 Resetear Francos de este Mes</button>
+    <button onclick="calcularMescompleto()">
+        Procesar Mes y Calcular Turnos
+    </button>
 
-    <div class="resultados" id="bloque-resultados">
-    </div>
+    <button onclick="limpiarFrancosDelMes()" class="btn-limpiar">
+        🔄 Resetear Francos de este Mes
+    </button>
+
+    <div class="resultados" id="bloque-resultados"></div>
 </div>
 
 <script>
-    const diasDelMes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; // Año 2026
-    const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    const diasDelMes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const nombresMeses = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
     const nombresDiasShort = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-    
+
     const personal = [
-        { nombre: 'Pace', maxHoraLineal: 18 },
-        { nombre: 'Videla', maxHoraLineal: 22 },
-        { nombre: 'Mansilla', maxHoraLineal: 30 },
-        { nombre: 'Carrizo', maxHoraLineal: 30 }
+        { nombre: "Pace", maxHoraLineal: 18 },
+        { nombre: "Videla", maxHoraLineal: 22 },
+        { nombre: "Mansilla", maxHoraLineal: 30 },
+        { nombre: "Carrizo", maxHoraLineal: 30 }
     ];
 
     let resultadosMesGlobal = [];
 
     function obtenerDiaTexto(d, mesIdx) {
         const fecha = new Date(2026, mesIdx, d);
-        const nombreDia = nombresDiasShort[fecha.getDay()];
-        const diaPadded = String(d).padStart(2, '0');
-        return `${nombreDia} ${diaPadded}`;
+        return `${nombresDiasShort[fecha.getDay()]} ${String(d).padStart(2, "0")}`;
+    }
+
+    function claveFeriado(mesIdx, dia) {
+        return `feriado-${mesIdx}-${dia}`;
+    }
+
+    function esFeriadoMarcado(mesIdx, dia) {
+        return localStorage.getItem(claveFeriado(mesIdx, dia)) === "true";
+    }
+
+    function esDomingo(mesIdx, dia) {
+        return new Date(2026, mesIdx, dia).getDay() === 0;
+    }
+
+    function esDomingoOFeriado(mesIdx, dia) {
+        return esDomingo(mesIdx, dia) || esFeriadoMarcado(mesIdx, dia);
+    }
+
+    function alternarFeriado(dia) {
+        const mesIdx = parseInt(document.getElementById("mesSelector").value);
+        const yaHabiaResultados = resultadosMesGlobal.length > 0;
+        const key = claveFeriado(mesIdx, dia);
+
+        if (localStorage.getItem(key) === "true") {
+            localStorage.removeItem(key);
+        } else {
+            localStorage.setItem(key, "true");
+        }
+
+        generarDias();
+
+        if (yaHabiaResultados) {
+            calcularMescompleto();
+        }
     }
 
     function permutar(arr) {
         if (arr.length === 0) return [[]];
+
         let res = [];
+
         for (let i = 0; i < arr.length; i++) {
-            let actual = arr[i];
             let restantes = arr.slice(0, i).concat(arr.slice(i + 1));
-            let permsRestantes = permutar(restantes);
-            for (let p of permsRestantes) {
-                res.push([actual].concat(p));
+
+            for (let p of permutar(restantes)) {
+                res.push([arr[i]].concat(p));
             }
         }
+
         return res;
     }
 
     function cambiarMes() {
-        const mesIdx = document.getElementById('mesSelector').value;
-        localStorage.setItem('mesPlanificadorGuardado', mesIdx);
+        const mesIdx = document.getElementById("mesSelector").value;
+        localStorage.setItem("mesPlanificadorGuardado", mesIdx);
         generarDias();
     }
 
     function generarDias() {
-        const mesIdx = parseInt(document.getElementById('mesSelector').value);
+        const mesIdx = parseInt(document.getElementById("mesSelector").value);
         const totalDias = diasDelMes[mesIdx];
-        const thead = document.getElementById('tabla-francos-header');
-        const tbody = document.getElementById('tabla-francos-body');
-        
-        let headerHtml = `<tr><th>Operario</th>`;
+        const thead = document.getElementById("tabla-francos-header");
+        const tbody = document.getElementById("tabla-francos-body");
+
+        let headerHtml = "<tr><th>Operario</th>";
+
         for (let d = 1; d <= totalDias; d++) {
-            let textoDia = obtenerDiaTexto(d, mesIdx);
-            let fecha = new Date(2026, mesIdx, d);
-            let dayOfWeek = fecha.getDay();
-            let claseFinDeSemana = '';
-            
-            if (dayOfWeek === 0) claseFinDeSemana = 'class="celda-domingo"';
-            else if (dayOfWeek === 6) claseFinDeSemana = 'class="celda-sabado"';
-            
-            headerHtml += `<th ${claseFinDeSemana}>${textoDia}</th>`;
+            const fecha = new Date(2026, mesIdx, d);
+            const dow = fecha.getDay();
+            const marcado = esFeriadoMarcado(mesIdx, d);
+
+            const clase = dow === 0
+                ? "celda-domingo"
+                : (dow === 6 ? "celda-sabado" : "");
+
+            const clases = [
+                clase,
+                marcado ? "celda-feriado" : "",
+                "dia-marcable"
+            ].filter(Boolean).join(" ");
+
+            headerHtml += `
+                <th
+                    class="${clases}"
+                    title="Tocá para marcar/desmarcar feriado nacional"
+                    onclick="alternarFeriado(${d})"
+                >
+                    ${obtenerDiaTexto(d, mesIdx)}
+                    ${marcado ? '<span class="marca-feriado">FERIADO</span>' : ""}
+                </th>
+            `;
         }
-        headerHtml += `</tr>`;
+
         thead.innerHTML = headerHtml;
-        
-        tbody.innerHTML = '';
+        tbody.innerHTML = "";
+
         personal.forEach(p => {
-            let tr = document.createElement('tr');
+            let tr = document.createElement("tr");
             let rowHtml = `<td><strong>${p.nombre}</strong></td>`;
-            
+
             for (let d = 1; d <= totalDias; d++) {
-                let pPace = localStorage.getItem(`franco-${p.nombre}-${mesIdx}-${d}`) === 'true';
-                let fecha = new Date(2026, mesIdx, d);
-                let dayOfWeek = fecha.getDay();
-                let claseFinDeSemana = '';
-                
-                if (dayOfWeek === 0) claseFinDeSemana = 'class="celda-domingo"';
-                else if (dayOfWeek === 6) claseFinDeSemana = 'class="celda-sabado"';
-                
+                const checked = localStorage.getItem(
+                    `franco-${p.nombre}-${mesIdx}-${d}`
+                ) === "true";
+
+                const dow = new Date(2026, mesIdx, d).getDay();
+
+                const clase = dow === 0
+                    ? "celda-domingo"
+                    : (dow === 6 ? "celda-sabado" : "");
+
                 rowHtml += `
-                    <td ${claseFinDeSemana}>
-                        <input type="checkbox" id="franco-${p.nombre}-${d}" ${pPace ? 'checked' : ''} onchange="guardarEstadoFranco('${p.nombre}', ${d}, this.checked)">
-                    </td>`;
+                    <td class="${clase}">
+                        <input
+                            type="checkbox"
+                            id="franco-${p.nombre}-${d}"
+                            ${checked ? "checked" : ""}
+                            onchange="guardarEstadoFranco('${p.nombre}', ${d}, this.checked)"
+                        >
+                    </td>
+                `;
             }
+
             tr.innerHTML = rowHtml;
             tbody.appendChild(tr);
         });
 
-        document.getElementById('bloque-resultados').innerHTML = '';
+        document.getElementById("bloque-resultados").innerHTML = "";
         resultadosMesGlobal = [];
     }
 
     function guardarEstadoFranco(nombre, dia, checked) {
-        const mesIdx = document.getElementById('mesSelector').value;
-        localStorage.setItem(`franco-${nombre}-${mesIdx}-${dia}`, checked);
-    }
+        const mesIdx = parseInt(document.getElementById("mesSelector").value);
 
-    function limpiarFrancosDelMes() {
-        if (confirm("¿Querés borrar todos los francos marcados de este mes para empezar de nuevo?")) {
-            const mesIdx = parseInt(document.getElementById('mesSelector').value);
-            const totalDias = diasDelMes[mesIdx];
-            
-            personal.forEach(p => {
-                for (let d = 1; d <= totalDias; d++) {
-                    localStorage.removeItem(`franco-${p.nombre}-${mesIdx}-${d}`);
-                }
-            });
-            generarDias();
+        localStorage.setItem(
+            `franco-${nombre}-${mesIdx}-${dia}`,
+            checked
+        );
+
+        if (resultadosMesGlobal.length) {
+            calcularMescompleto();
         }
     }
 
+    function limpiarFrancosDelMes() {
+        if (!confirm("¿Querés borrar todos los francos marcados de este mes para empezar de nuevo?")) {
+            return;
+        }
+
+        const mesIdx = parseInt(document.getElementById("mesSelector").value);
+        const totalDias = diasDelMes[mesIdx];
+
+        personal.forEach(p => {
+            for (let d = 1; d <= totalDias; d++) {
+                localStorage.removeItem(`franco-${p.nombre}-${mesIdx}-${d}`);
+            }
+        });
+
+        generarDias();
+    }
+
     function operarioFrancoDomingoAnterior(nombre, diaActual, mesIdx) {
-        let mIdx = parseInt(mesIdx);
-        let fechaActual = new Date(2026, mIdx, diaActual);
-        let diaSemana = fechaActual.getDay();
-        
-        let diasDeDiferencia = (diaSemana === 0) ? 7 : diaSemana;
-        let domingoAnterior = new Date(2026, mIdx, diaActual - diasDeDiferencia);
-        
-        // FIX: Validar que sea el mismo mes Y año
-        if (domingoAnterior.getMonth() !== mIdx || domingoAnterior.getFullYear() !== 2026) return false;
+        const fechaActual = new Date(2026, parseInt(mesIdx), diaActual);
+        const diaSemana = fechaActual.getDay();
+        const diasDeDiferencia = diaSemana === 0 ? 7 : diaSemana;
 
-        let domMes = domingoAnterior.getMonth();
-        let domDia = domingoAnterior.getDate();
+        const domingoAnterior = new Date(
+            2026,
+            parseInt(mesIdx),
+            diaActual - diasDeDiferencia
+        );
 
-        return localStorage.getItem(`franco-${nombre}-${domMes}-${domDia}`) === 'true';
+        if (
+            domingoAnterior.getMonth() !== parseInt(mesIdx) ||
+            domingoAnterior.getFullYear() !== 2026
+        ) {
+            return false;
+        }
+
+        return localStorage.getItem(
+            `franco-${nombre}-${domingoAnterior.getMonth()}-${domingoAnterior.getDate()}`
+        ) === "true";
     }
 
     function calcularMescompleto() {
-        const mesSelector = document.getElementById('mesSelector');
+        const mesSelector = document.getElementById("mesSelector");
         if (!mesSelector) return;
-        
+
         const mesIdx = parseInt(mesSelector.value);
         const totalDias = diasDelMes[mesIdx];
-        
+
         resultadosMesGlobal = [];
         let detectoError = false;
 
-        console.log(`--- INICIANDO CÁLCULO PARA MES INDEX ${mesIdx} (${totalDias} DÍAS) ---`);
-
         for (let d = 1; d <= totalDias; d++) {
             let disponibles = personal.filter(p => {
-                let el = document.getElementById(`franco-${p.nombre}-${d}`);
+                const el = document.getElementById(`franco-${p.nombre}-${d}`);
                 return el ? !el.checked : true;
             });
 
             if (disponibles.length < 2) {
-                resultadosMesGlobal.push({ dia: d, Pace: "FALTAN OPERARIOS", Videla: "FALTAN OPERARIOS", Mansilla: "FALTAN OPERARIOS", Carrizo: "FALTAN OPERARIOS", error: true });
+                resultadosMesGlobal.push({
+                    dia: d,
+                    Pace: "FALTAN OPERARIOS",
+                    Videla: "FALTAN OPERARIOS",
+                    Mansilla: "FALTAN OPERARIOS",
+                    Carrizo: "FALTAN OPERARIOS",
+                    error: true
+                });
+
                 detectoError = true;
                 continue;
             }
 
             let esDiaPredictivo = false;
+
             if (d < totalDias) {
-                let elPaceManana = document.getElementById(`franco-Pace-${d+1}`);
-                let elVidelaManana = document.getElementById(`franco-Videla-${d+1}`);
-                
-                let mananaPaceFranco = elPaceManana ? elPaceManana.checked : false;
-                let mananaVidelaDisponible = elVidelaManana ? !elVidelaManana.checked : true;
-                
+                const elPaceManana = document.getElementById(`franco-Pace-${d + 1}`);
+                const elVidelaManana = document.getElementById(`franco-Videla-${d + 1}`);
+
+                const mananaPaceFranco = elPaceManana ? elPaceManana.checked : false;
+                const mananaVidelaDisponible = elVidelaManana ? !elVidelaManana.checked : true;
+
                 if (mananaPaceFranco && mananaVidelaDisponible) {
                     esDiaPredictivo = true;
                 }
             }
 
             let turnosConfig = [];
+
             if (esDiaPredictivo && disponibles.length === 3) {
                 turnosConfig = [
-                    { inicioStr: '06:00', finStr: '12:00', finLineal: 12 },
-                    { inicioStr: '12:00', finStr: '18:00', finLineal: 18 },
-                    { inicioStr: '18:00', finStr: '06:00', finLineal: 30 }
+                    { inicioStr: "06:00", finStr: "12:00", finLineal: 12 },
+                    { inicioStr: "12:00", finStr: "18:00", finLineal: 18 },
+                    { inicioStr: "18:00", finStr: "06:00", finLineal: 30 }
                 ];
             } else {
-                let horasPorTurno = 24 / disponibles.length;
+                const horasPorTurno = 24 / disponibles.length;
+
                 for (let i = 0; i < disponibles.length; i++) {
-                    let inicioLineal = 6 + (i * horasPorTurno);
-                    let finLineal = 6 + ((i + 1) * horasPorTurno);
-                    let inicioReloj = inicioLineal % 24;
-                    let finReloj = finLineal % 24;
-                    
+                    const inicioLineal = 6 + (i * horasPorTurno);
+                    const finLineal = 6 + ((i + 1) * horasPorTurno);
+
+                    const inicioReloj = inicioLineal % 24;
+                    const finReloj = finLineal % 24;
+
                     turnosConfig.push({
-                        inicioStr: String(inicioReloj).padStart(2, '0') + ':00',
-                        finStr: String(finReloj).padStart(2, '0') + ':00',
+                        inicioStr: String(inicioReloj).padStart(2, "0") + ":00",
+                        finStr: String(finReloj).padStart(2, "0") + ":00",
                         finLineal: finLineal
                     });
                 }
             }
 
-            // Fisher-Yates determinista
             let todasLasCombinaciones = permutar(disponibles);
             let seed = d + (mesIdx * 31);
+
             for (let i = todasLasCombinaciones.length - 1; i > 0; i--) {
                 seed = (seed * 9301 + 49297) % 233280;
-                let j = Math.floor((seed / 233280) * (i + 1));
-                [todasLasCombinaciones[i], todasLasCombinaciones[j]] = [todasLasCombinaciones[j], todasLasCombinaciones[i]];
+                const j = Math.floor((seed / 233280) * (i + 1));
+
+                [
+                    todasLasCombinaciones[i],
+                    todasLasCombinaciones[j]
+                ] = [
+                    todasLasCombinaciones[j],
+                    todasLasCombinaciones[i]
+                ];
             }
 
             let combinacionValida = null;
-            let obligaNocheCarrizo = operarioFrancoDomingoAnterior('Carrizo', d, mesIdx);
-            let obligaNocheMansilla = operarioFrancoDomingoAnterior('Mansilla', d, mesIdx);
+
+            const obligaNocheCarrizo = operarioFrancoDomingoAnterior(
+                "Carrizo", d, mesIdx
+            );
+
+            const obligaNocheMansilla = operarioFrancoDomingoAnterior(
+                "Mansilla", d, mesIdx
+            );
 
             for (let comb of todasLasCombinaciones) {
                 let esValida = true;
@@ -496,56 +730,62 @@
                 }
 
                 if (esValida) {
-                    let posPace = comb.findIndex(p => p.nombre === 'Pace');
+                    const posPace = comb.findIndex(p => p.nombre === "Pace");
+
                     if (posPace !== -1 && posPace !== 0) {
                         esValida = false;
                     }
                 }
 
                 if (esValida && esDiaPredictivo) {
-                    let posVidela = comb.findIndex(p => p.nombre === 'Videla');
-                    if (posVidela !== -1) {
-                        if (turnosConfig[posVidela].finLineal > 18) {
-                            esValida = false;
-                        }
+                    const posVidela = comb.findIndex(p => p.nombre === "Videla");
+
+                    if (
+                        posVidela !== -1 &&
+                        turnosConfig[posVidela].finLineal > 18
+                    ) {
+                        esValida = false;
                     }
                 }
 
-                // VALIDACIÓN CORREGIDA: Si hoy Pace tiene franco, Videla debe entrar a las 06:00
-                // Y verificamos que ayer Videla no salió a las 22:00
                 if (esValida) {
-                    let elPaceHoy = document.getElementById(`franco-Pace-${d}`);
-                    let elVidelaHoy = document.getElementById(`franco-Videla-${d}`);
-                    let hoyPaceFranco = elPaceHoy ? elPaceHoy.checked : false;
-                    let hoyVidelaDisponible = elVidelaHoy ? !elVidelaHoy.checked : true;
+                    const elPaceHoy = document.getElementById(`franco-Pace-${d}`);
+                    const elVidelaHoy = document.getElementById(`franco-Videla-${d}`);
+
+                    const hoyPaceFranco = elPaceHoy ? elPaceHoy.checked : false;
+                    const hoyVidelaDisponible = elVidelaHoy ? !elVidelaHoy.checked : true;
 
                     if (hoyPaceFranco && hoyVidelaDisponible) {
-                        let posVidela = comb.findIndex(p => p.nombre === 'Videla');
+                        const posVidela = comb.findIndex(p => p.nombre === "Videla");
+
                         if (posVidela !== 0) {
                             esValida = false;
                         } else if (d > 1 && resultadosMesGlobal.length > 0) {
-                            // Videla entra a las 06:00 hoy, verificar que ayer no salió a las 22:00
-                            let resultadoAyer = resultadosMesGlobal[d - 2]; // d es 1-indexed
-                            if (resultadoAyer && resultadoAyer['Videla']) {
-                                let turnoAyer = resultadoAyer['Videla'];
-                                // Si ayer Videla salió a las 22:00
-                                if (turnoAyer.endsWith('a 22:00')) {
-                                    esValida = false;
-                                }
+                            const resultadoAyer = resultadosMesGlobal[d - 2];
+
+                            if (
+                                resultadoAyer &&
+                                resultadoAyer["Videla"] &&
+                                resultadoAyer["Videla"].endsWith("a 22:00")
+                            ) {
+                                esValida = false;
                             }
                         }
                     }
                 }
 
                 if (esValida && obligaNocheCarrizo) {
-                    let pos = comb.findIndex(p => p.nombre === 'Carrizo');
-                    if (pos !== -1 && pos !== (turnosConfig.length - 1)) {
+                    const pos = comb.findIndex(p => p.nombre === "Carrizo");
+
+                    if (pos !== -1 && pos !== turnosConfig.length - 1) {
                         esValida = false;
                     }
                 }
+
                 if (esValida && obligaNocheMansilla) {
-                    let pos = comb.findIndex(p => p.nombre === 'Mansilla');
-                    if (pos !== -1 && pos !== (turnosConfig.length - 1)) {
+                    const pos = comb.findIndex(p => p.nombre === "Mansilla");
+
+                    if (pos !== -1 && pos !== turnosConfig.length - 1) {
                         esValida = false;
                     }
                 }
@@ -557,15 +797,34 @@
             }
 
             if (!combinacionValida) {
-                resultadosMesGlobal.push({ dia: d, Pace: "INCOMPATIBLE", Videla: "INCOMPATIBLE", Mansilla: "INCOMPATIBLE", Carrizo: "INCOMPATIBLE", error: true });
+                resultadosMesGlobal.push({
+                    dia: d,
+                    Pace: "INCOMPATIBLE",
+                    Videla: "INCOMPATIBLE",
+                    Mansilla: "INCOMPATIBLE",
+                    Carrizo: "INCOMPATIBLE",
+                    error: true
+                });
+
                 detectoError = true;
             } else {
-                let asignacionDia = { dia: d, Pace: "FRANCO", Videla: "FRANCO", Mansilla: "FRANCO", Carrizo: "FRANCO", error: false };
+                let asignacionDia = {
+                    dia: d,
+                    Pace: "FRANCO",
+                    Videla: "FRANCO",
+                    Mansilla: "FRANCO",
+                    Carrizo: "FRANCO",
+                    error: false
+                };
+
                 for (let i = 0; i < turnosConfig.length; i++) {
-                    let emp = combinacionValida[i];
-                    let t = turnosConfig[i];
-                    asignacionDia[emp.nombre] = `${t.inicioStr} a ${t.finStr}`;
+                    const emp = combinacionValida[i];
+                    const turno = turnosConfig[i];
+
+                    asignacionDia[emp.nombre] =
+                        `${turno.inicioStr} a ${turno.finStr}`;
                 }
+
                 resultadosMesGlobal.push(asignacionDia);
             }
         }
@@ -573,15 +832,132 @@
         renderizarResultados(detectoError);
     }
 
+    /*
+      Cada domingo o feriado trabajado genera un aviso pendiente.
+      Un franco posterior consume el aviso más antiguo de ese operario.
+      Así, un único franco no elimina varios avisos.
+    */
+    function obtenerAvisosPendientes(mesIdx) {
+        const eventos = [];
+        const totalDias = diasDelMes[mesIdx];
+
+        personal.forEach(p => {
+            const pendientes = [];
+
+            for (let d = 1; d <= totalDias; d++) {
+                const resultado = resultadosMesGlobal[d - 1];
+                if (!resultado) continue;
+
+                const tieneFranco = localStorage.getItem(
+                    `franco-${p.nombre}-${mesIdx}-${d}`
+                ) === "true";
+
+                if (tieneFranco) {
+                    if (pendientes.length) {
+                        pendientes.shift();
+                    }
+                    continue;
+                }
+
+                if (esDomingoOFeriado(mesIdx, d)) {
+                    const valor = resultado[p.nombre] || "";
+
+                    const trabajo =
+                        valor !== "FRANCO" &&
+                        valor !== "FALTAN OPERARIOS" &&
+                        valor !== "INCOMPATIBLE";
+
+                    if (trabajo) {
+                        let tipo;
+
+                        if (
+                            esDomingo(mesIdx, d) &&
+                            esFeriadoMarcado(mesIdx, d)
+                        ) {
+                            tipo = "domingo y feriado";
+                        } else if (esDomingo(mesIdx, d)) {
+                            tipo = "domingo";
+                        } else {
+                            tipo = "feriado";
+                        }
+
+                        pendientes.push({
+                            dia: d,
+                            nombre: p.nombre,
+                            turno: valor,
+                            tipo: tipo
+                        });
+                    }
+                }
+            }
+
+            pendientes.forEach(aviso => eventos.push(aviso));
+        });
+
+        return eventos.sort(
+            (a, b) => a.dia - b.dia || a.nombre.localeCompare(b.nombre)
+        );
+    }
+
     function renderizarResultados(conErrores) {
-        const contenedor = document.getElementById('bloque-resultados');
-        const mesIdx = parseInt(document.getElementById('mesSelector').value);
-        
+        const contenedor = document.getElementById("bloque-resultados");
+        const mesIdx = parseInt(document.getElementById("mesSelector").value);
+        const avisos = obtenerAvisosPendientes(mesIdx);
+
         let html = `
-            <div class="section-title">Paso 2: Vista Previa y Descarga de Planilla</div>
-            <button onclick="descargarPlanillaCSV()" class="btn-exportar">📤 Compartir Archivo (.csv)</button>
-            <button onclick="copiarParaExcel()" class="btn-copiar">📋 Copiar Datos (Para Excel/Sheets)</button>
-            
+            <div class="section-title">
+                Paso 2: Vista Previa y Descarga de Planilla
+            </div>
+
+            <button onclick="descargarPlanillaCSV()" class="btn-exportar">
+                📤 Compartir Archivo (.csv)
+            </button>
+
+            <button onclick="copiarParaExcel()" class="btn-copiar">
+                📋 Copiar Datos (Para Excel/Sheets)
+            </button>
+
+            <section class="avisos-panel" aria-live="polite">
+                <h2>🔔 Avisos de francos pendientes</h2>
+
+                <p class="avisos-intro">
+                    Se muestran los operarios que trabajaron un domingo o
+                    feriado marcado y todavía no tienen un franco posterior
+                    registrado para compensarlo.
+                </p>
+        `;
+
+        if (!avisos.length) {
+            html += `
+                <div class="aviso-vacio">
+                    ✅ No hay avisos pendientes según los francos y turnos registrados.
+                </div>
+            `;
+        } else {
+            avisos.forEach(a => {
+                html += `
+                    <div class="aviso-item">
+                        <strong>
+                            ${a.nombre} — ${obtenerDiaTexto(a.dia, mesIdx)}
+                            (${a.tipo})
+                        </strong>
+                        <br>
+                        Turno asignado: ${a.turno}.
+                        Revisá la asignación de un franco posterior.
+                    </div>
+                `;
+            });
+        }
+
+        html += `
+                <p class="aviso-nota">
+                    Importante: cada franco posterior marcado se aplica
+                    automáticamente al pendiente más antiguo de ese operario.
+                    El sistema no determina obligaciones legales ni plazos de
+                    compensación; sirve como recordatorio según los datos cargados.
+                </p>
+            </section>
+
             <div class="scroll-container">
                 <table class="tabla-horizontal">
                     <thead>
@@ -590,8 +966,20 @@
         `;
 
         resultadosMesGlobal.forEach(r => {
-            let textoDia = obtenerDiaTexto(r.dia, mesIdx);
-            html += `<th>${textoDia}</th>`;
+            const feriado = esFeriadoMarcado(mesIdx, r.dia);
+            const domingo = esDomingo(mesIdx, r.dia);
+            const sabado = new Date(2026, mesIdx, r.dia).getDay() === 6;
+
+            const clase = domingo || feriado
+                ? "celda-domingo"
+                : (sabado ? "celda-sabado" : "");
+
+            html += `
+                <th class="${clase}">
+                    ${obtenerDiaTexto(r.dia, mesIdx)}
+                    ${feriado ? '<span class="marca-feriado">FERIADO</span>' : ""}
+                </th>
+            `;
         });
 
         html += `
@@ -602,21 +990,35 @@
 
         personal.forEach(p => {
             html += `<tr><td><strong>${p.nombre}</strong></td>`;
+
             resultadosMesGlobal.forEach(r => {
-                let valor = r[p.nombre];
-                let clase = valor === 'FRANCO' ? 'celda-franco' : (r.error ? 'celda-error' : 'celda-turno');
+                const valor = r[p.nombre];
+
+                const clase = valor === "FRANCO"
+                    ? "celda-franco"
+                    : (r.error ? "celda-error" : "celda-turno");
+
                 html += `<td class="${clase}">${valor}</td>`;
             });
-            html += `</tr>`;
+
+            html += "</tr>";
         });
 
-        html += `</tbody></table></div>`;
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
 
         if (conErrores) {
             html += `
                 <div class="alert-error">
-                    <strong>Atención:</strong> Se detectaron días con problemas (marcados en rojo). Esto ocurre si dejas a menos de 2 personas trabajando, si las restricciones horarias fallan, o si las nuevas condiciones de descanso impiden un solape seguro.
-                </div>`;
+                    <strong>Atención:</strong> Se detectaron días con problemas
+                    (marcados en rojo). Esto ocurre si dejás a menos de 2 personas
+                    trabajando o si las restricciones horarias impiden una
+                    asignación válida.
+                </div>
+            `;
         }
 
         contenedor.innerHTML = html;
@@ -624,96 +1026,147 @@
 
     function descargarPlanillaCSV() {
         if (resultadosMesGlobal.length === 0) return;
-        
-        const mesIdx = parseInt(document.getElementById('mesSelector').value);
-        const mesNombre = nombresMeses[mesIdx];
-        const nombreArchivo = `Planilla_Turnos_${mesNombre}_2026.csv`;
-        
+
+        const mesIdx = parseInt(document.getElementById("mesSelector").value);
+        const nombreArchivo = `Planilla_Turnos_${nombresMeses[mesIdx]}_2026.csv`;
+
         let csvRows = [];
-        
         let encabezados = ["Operario"];
+
         resultadosMesGlobal.forEach(r => {
             encabezados.push(obtenerDiaTexto(r.dia, mesIdx));
         });
+
         csvRows.push(encabezados.map(h => `"${h}"`).join(","));
 
         personal.forEach(p => {
             let fila = [p.nombre];
+
             resultadosMesGlobal.forEach(r => {
                 fila.push(r[p.nombre]);
             });
-            csvRows.push(fila.map(v => `"${v}"`).join(","));
+
+            csvRows.push(
+                fila.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")
+            );
         });
 
-        let csvString = "\uFEFF" + csvRows.join("\n");
+        const filaFeriados = ["Feriado"];
+
+        resultadosMesGlobal.forEach(r => {
+            filaFeriados.push(
+                esFeriadoMarcado(mesIdx, r.dia) ? "Sí" : ""
+            );
+        });
+
+        csvRows.push(
+            filaFeriados.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")
+        );
+
+        const csvString = "\uFEFF" + csvRows.join("\n");
 
         if (navigator.canShare && navigator.share) {
             try {
-                let blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-                let archivo = new File([blob], nombreArchivo, { type: 'text/csv' });
-                
+                const blob = new Blob(
+                    [csvString],
+                    { type: "text/csv;charset=utf-8;" }
+                );
+
+                const archivo = new File(
+                    [blob],
+                    nombreArchivo,
+                    { type: "text/csv" }
+                );
+
                 navigator.share({
                     files: [archivo],
                     title: nombreArchivo
                 }).catch(() => {
                     ejecutarDescargaClasica(csvString, nombreArchivo);
                 });
+
                 return;
-            } catch (e) {}
+            } catch (e) {
+                // Si compartir no está disponible, se descarga el archivo.
+            }
         }
 
         ejecutarDescargaClasica(csvString, nombreArchivo);
     }
 
     function ejecutarDescargaClasica(csvString, nombreArchivo) {
-        let blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-        let link = document.createElement("a");
-        let url = URL.createObjectURL(blob);
+        const blob = new Blob(
+            [csvString],
+            { type: "text/csv;charset=utf-8;" }
+        );
+
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+
         link.setAttribute("href", url);
         link.setAttribute("download", nombreArchivo);
-        link.style.visibility = 'hidden';
+        link.style.visibility = "hidden";
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
         URL.revokeObjectURL(url);
     }
 
     function copiarParaExcel() {
         if (resultadosMesGlobal.length === 0) return;
-        
-        const mesIdx = parseInt(document.getElementById('mesSelector').value);
-        
+
+        const mesIdx = parseInt(document.getElementById("mesSelector").value);
         let encabezados = ["Operario"];
+
         resultadosMesGlobal.forEach(r => {
             encabezados.push(obtenerDiaTexto(r.dia, mesIdx));
         });
+
         let textoCopiar = encabezados.join("\t") + "\n";
 
         personal.forEach(p => {
             let fila = [p.nombre];
+
             resultadosMesGlobal.forEach(r => {
                 fila.push(r[p.nombre]);
             });
+
             textoCopiar += fila.join("\t") + "\n";
         });
 
-        navigator.clipboard.writeText(textoCopiar).then(() => {
-            alert("¡Copiado horizontal con éxito!\n\nAhora podés ir a Google Sheets o Excel y pegar directamente.");
-        }).catch(() => {
-            alert("No se pudo copiar automáticamente.");
+        const filaFeriados = ["Feriado"];
+
+        resultadosMesGlobal.forEach(r => {
+            filaFeriados.push(
+                esFeriadoMarcado(mesIdx, r.dia) ? "Sí" : ""
+            );
         });
+
+        textoCopiar += filaFeriados.join("\t") + "\n";
+
+        navigator.clipboard.writeText(textoCopiar)
+            .then(() => {
+                alert(
+                    "¡Copiado con éxito!\n\n" +
+                    "Podés pegar la planilla en Google Sheets o Excel. " +
+                    "Se incluye una fila que identifica los feriados marcados."
+                );
+            })
+            .catch(() => {
+                alert("No se pudo copiar automáticamente.");
+            });
     }
 
     window.onload = function() {
-        const mesGuardado = localStorage.getItem('mesPlanificadorGuardado');
-        if (mesGuardado !== null) {
-            document.getElementById('mesSelector').value = mesGuardado;
-        } else {
-            document.getElementById('mesSelector').value = "4";
-        }
+        const mesGuardado = localStorage.getItem("mesPlanificadorGuardado");
+
+        document.getElementById("mesSelector").value =
+            mesGuardado !== null ? mesGuardado : "4";
+
         generarDias();
     };
 </script>
-
 </body>
 </html>
