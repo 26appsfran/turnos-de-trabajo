@@ -1,874 +1,823 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#1e3a8a">
-<title>Macrodesk | Planificador de Turnos</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Macrodesk | Planificador de turnos</title>
 <style>
-:root {
-    --azul: #1e3a8a;
-    --azul-claro: #eff6ff;
-    --fondo: #f1f5f9;
-    --borde: #e2e8f0;
-    --texto: #1e293b;
-    --verde: #15803d;
-    --amarillo: #fef9c3;
-    --naranja: #ffedd5;
-    --rojo: #b91c1c;
+:root{
+  --navy:#142b4a;--blue:#2463a6;--blue-light:#dceafa;
+  --green:#dff2e5;--green-dark:#246b43;--orange:#fff0d9;
+  --red:#fbe2e2;--bg:#f3f6fa;--white:#fff;--text:#1e293b;
+  --muted:#64748b;--border:#d8e1ec;
 }
-
-* { box-sizing: border-box; }
-
-body {
-    margin: 0;
-    padding: 12px;
-    background: var(--fondo);
-    color: var(--texto);
-    font-family: Arial, sans-serif;
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Arial,sans-serif;color:var(--text)}
+header{background:var(--navy);color:white;padding:24px 18px}
+.header-inner{max-width:1500px;margin:auto}
+.brand{font-size:12px;letter-spacing:2px;color:#b9d8fa;font-weight:bold}
+h1{margin:8px 0;font-size:27px}
+header p{margin:0;color:#d5e2f2;font-size:14px}
+main{max-width:1500px;margin:22px auto;padding:0 16px 40px}
+.card{background:white;border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:18px;box-shadow:0 3px 12px #142b4a0a}
+h2{font-size:18px;margin:0 0 14px;color:var(--navy)}
+h3{font-size:15px;margin:0 0 10px}
+label{font-size:13px;font-weight:bold;display:block;margin-bottom:6px}
+input,select,button{font:inherit}
+input[type="month"],input[type="date"],select,input[type="text"]{
+  padding:10px;border:1px solid var(--border);border-radius:8px;background:white;max-width:100%
 }
-
-.container {
-    max-width: 1000px;
-    margin: auto;
-    padding: 18px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px #0f172a0d;
+button{border:0;border-radius:9px;padding:11px 15px;cursor:pointer;font-weight:bold}
+button:disabled{opacity:.45;cursor:not-allowed}
+.primary{background:var(--blue);color:white}
+.secondary{background:#e8eef6;color:var(--navy)}
+.danger{background:#fbe2e2;color:#9c2525}
+.success{background:#dff2e5;color:#246b43}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.field{min-width:170px}
+.small{font-size:12px;color:var(--muted);line-height:1.5}
+.employee-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.employee-card{border:1px solid var(--border);border-radius:10px;padding:12px}
+.employee-card strong{display:block;margin-bottom:6px}
+.pill{display:inline-block;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:bold}
+.pill-blue{background:var(--blue-light);color:#174a80}
+.pill-green{background:var(--green);color:var(--green-dark)}
+.pill-orange{background:var(--orange);color:#88500c}
+.pill-red{background:var(--red);color:#a42626}
+.table-wrap{overflow:auto;width:100%;border:1px solid var(--border);border-radius:10px}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}
+th,td{border-right:1px solid #d8e1ec;border-bottom:1px solid #d8e1ec;padding:8px;text-align:center;vertical-align:middle}
+th{background:var(--navy);color:white;position:sticky;top:0;z-index:2}
+th:first-child,td:first-child{position:sticky;left:0;z-index:3;min-width:120px}
+th:first-child{background:var(--navy)}
+td:first-child{background:#f0f4f9;font-weight:bold;text-align:left}
+th.day-head{min-width:105px}
+th .day-name{display:block;font-size:10px;font-weight:normal;margin-bottom:4px;color:#d4e4f8}
+th .day-num{font-size:16px}
+th .special-label{display:block;font-size:10px;color:#ffdf9e;margin-top:4px}
+td.shift{background:var(--blue-light);color:#174a80;font-weight:bold}
+td.off{background:var(--green);color:var(--green-dark);font-weight:bold}
+td.absent{background:var(--orange);color:#88500c;font-weight:bold}
+td.conflict{background:var(--red);color:#a42626;font-weight:bold}
+td.unassigned{background:#fff4f4;color:#a42626}
+td.weekend{border-left:2px solid #9ab7da}
+.status-box{padding:12px;border-radius:9px;margin:10px 0;font-size:13px;line-height:1.5}
+.status-ok{background:var(--green);color:var(--green-dark)}
+.status-warn{background:var(--orange);color:#88500c}
+.status-error{background:var(--red);color:#a42626}
+.special-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.special-day{border:1px solid var(--border);border-radius:10px;padding:12px}
+.special-day h3{color:var(--navy)}
+.check-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.check-row{display:flex;align-items:center;gap:8px;font-size:13px}
+.check-row input{width:17px;height:17px;accent-color:var(--blue)}
+.inline-form{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.inline-form .field{flex:1;min-width:140px}
+.event-list{display:grid;gap:8px;margin-top:12px}
+.event-item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px;background:#fff7e9;border:1px solid #f2dfbd;border-radius:9px;font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0;font-size:12px}
+.legend span{display:flex;align-items:center;gap:6px}
+.swatch{height:14px;width:14px;border-radius:3px;border:1px solid #ccd5df}
+.result-title{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.hidden{display:none!important}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:16px}
+@media(max-width:600px){
+  header{padding:20px 14px}h1{font-size:23px}
+  main{padding:0 10px 28px;margin-top:12px}
+  .card{padding:13px}
+  .toolbar button{flex:1}
+  .field{width:100%}
 }
-
-h1 {
-    margin: 0 0 8px;
-    text-align: center;
-    color: var(--azul);
-    font-size: 23px;
-}
-
-.subtitulo {
-    text-align: center;
-    color: #64748b;
-    font-size: 13px;
-    margin-bottom: 20px;
-}
-
-.panel {
-    padding: 14px;
-    margin: 14px 0;
-    border: 1px solid var(--borde);
-    border-radius: 12px;
-    background: #fff;
-}
-
-h2 {
-    margin: 0 0 12px;
-    font-size: 17px;
-}
-
-h3 {
-    margin: 18px 0 8px;
-    font-size: 15px;
-}
-
-label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: bold;
-    font-size: 13px;
-}
-
-select, button {
-    width: 100%;
-    padding: 12px;
-    border-radius: 9px;
-    font-size: 15px;
-}
-
-select {
-    border: 1px solid #cbd5e1;
-    background: white;
-}
-
-button {
-    border: none;
-    background: var(--azul);
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 8px;
-}
-
-button:hover { filter: brightness(.93); }
-
-.btn-verde { background: var(--verde); }
-.btn-gris { background: #64748b; }
-
-.instrucciones {
-    background: var(--azul-claro);
-    border-left: 4px solid #3b82f6;
-    padding: 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    line-height: 1.6;
-}
-
-.scroll {
-    overflow: auto;
-    max-height: 440px;
-    border: 1px solid var(--borde);
-    border-radius: 9px;
-    -webkit-overflow-scrolling: touch;
-}
-
-table {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 13px;
-}
-
-th, td {
-    padding: 10px;
-    border-bottom: 1px solid var(--borde);
-    text-align: center;
-    white-space: nowrap;
-}
-
-th {
-    background: #f8fafc;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-}
-
-th:first-child, td:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 3;
-    background: white;
-    text-align: left;
-    font-weight: bold;
-}
-
-th:first-child {
-    background: #f8fafc;
-    z-index: 4;
-}
-
-.dia-domingo, .dia-feriado { background: var(--amarillo) !important; }
-.dia-sabado { background: var(--naranja) !important; }
-
-.cabecera-dia {
-    cursor: pointer;
-    user-select: none;
-}
-
-.cabecera-dia:hover { outline: 2px solid #eab308; }
-
-.mini {
-    display: block;
-    color: #854d0e;
-    font-size: 10px;
-    margin-top: 3px;
-}
-
-input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    accent-color: var(--azul);
-}
-
-.nota {
-    font-size: 12px;
-    color: #64748b;
-    line-height: 1.5;
-}
-
-.aviso {
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 9px;
-    background: #fffbeb;
-    border: 1px solid #fcd34d;
-    font-size: 13px;
-    line-height: 1.5;
-}
-
-.error {
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 9px;
-    background: #fef2f2;
-    border: 1px solid #fca5a5;
-    color: #991b1b;
-    font-size: 13px;
-    line-height: 1.5;
-}
-
-.ok {
-    padding: 12px;
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    color: #166534;
-    border-radius: 9px;
-    font-size: 13px;
-}
-
-.franco { background: #f1f5f9; color: #64748b; }
-.turno { background: #f0fdf4; color: #166534; font-weight: bold; }
-.conflicto { background: #fee2e2; color: #991b1b; font-weight: bold; }
-
-@media (max-width: 500px) {
-    .container { padding: 12px; }
-    h1 { font-size: 20px; }
-    th, td { padding: 9px 8px; }
+@media print{
+  header{background:white;color:black;padding:10px}
+  header p,.brand{color:black}
+  body{background:white}
+  main{max-width:none;margin:0;padding:0}
+  .no-print,.card.controls,.event-card,.special-card,footer{display:none!important}
+  .card{border:0;box-shadow:none;padding:4px}
+  .table-wrap{overflow:visible;border:0}
+  th,td{position:static!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  table{font-size:8px}
+  th,td{padding:4px}
 }
 </style>
 </head>
-
 <body>
-<div class="container">
+<header>
+  <div class="header-inner">
+    <div class="brand">MACRODESK</div>
+    <h1>Planificador mensual de turnos</h1>
+    <p>Planificación automática · Francos · Eventualidades · Exportación</p>
+  </div>
+</header>
 
-    <h1>Macrodesk</h1>
-    <div class="subtitulo">Planificador mensual de turnos y francos</div>
-
-    <div class="instrucciones">
-        <strong>Cómo usar la aplicación</strong><br>
-        1. Marcá como feriados los días que correspondan tocando su encabezado.<br>
-        2. En domingos y feriados, marcá únicamente a los operarios que trabajan.<br>
-        3. Los francos restantes se asignan automáticamente según las reglas configuradas.<br>
-        4. Presioná <strong>Calcular turnos</strong> para ver el resultado y los avisos.
+<main>
+  <section class="card controls">
+    <h2>1. Configuración del mes</h2>
+    <div class="toolbar">
+      <div class="field">
+        <label for="mes">Mes a planificar</label>
+        <input type="month" id="mes">
+      </div>
+      <button class="primary" id="calcularBtn">Calcular planilla</button>
+      <button class="secondary" id="guardarBtn">Guardar cambios</button>
+      <button class="secondary" id="imprimirBtn">Imprimir / PDF</button>
     </div>
+    <p class="small">La jornada operativa va de las 06:00 a las 06:00 del día siguiente. Los cambios se guardan en este navegador.</p>
+  </section>
 
-    <div class="panel">
-        <label for="mes">Mes de planificación — 2026</label>
-        <select id="mes" onchange="cambiarMes()">
-            <option value="0">Enero</option>
-            <option value="1">Febrero</option>
-            <option value="2">Marzo</option>
-            <option value="3">Abril</option>
-            <option value="4">Mayo</option>
-            <option value="5">Junio</option>
-            <option value="6">Julio</option>
-            <option value="7">Agosto</option>
-            <option value="8">Septiembre</option>
-            <option value="9">Octubre</option>
-            <option value="10">Noviembre</option>
-            <option value="11">Diciembre</option>
+  <section class="card">
+    <h2>2. Domingos y feriados: quién trabaja</h2>
+    <p class="small">Marcá a cada persona que trabaja en el día especial. Si marcás un domingo, esa persona también trabajará el sábado anterior en el mismo horario. Solo el domingo genera los francos compensatorios del lunes y del fin de semana siguiente.</p>
+    <div class="toolbar" style="margin:12px 0">
+      <div class="field">
+        <label for="nuevoFeriado">Agregar feriado</label>
+        <input type="date" id="nuevoFeriado">
+      </div>
+      <button class="secondary" id="agregarFeriadoBtn">Agregar feriado</button>
+    </div>
+    <div id="feriadosActuales" class="small"></div>
+    <div id="diasEspeciales" class="special-list" style="margin-top:14px"></div>
+  </section>
+
+  <section class="card event-card">
+    <h2>3. Eventualidades y ausencias</h2>
+    <p class="small">Registrá una ausencia puntual para que esa persona no reciba un turno en esa fecha. La eventualidad no reemplaza ni elimina los francos automáticos.</p>
+    <div class="inline-form">
+      <div class="field">
+        <label for="eventoFecha">Fecha</label>
+        <input type="date" id="eventoFecha">
+      </div>
+      <div class="field">
+        <label for="eventoOperario">Operario</label>
+        <select id="eventoOperario"></select>
+      </div>
+      <div class="field">
+        <label for="eventoTipo">Tipo</label>
+        <select id="eventoTipo">
+          <option value="Ausencia">Ausencia</option>
+          <option value="Licencia">Licencia</option>
+          <option value="Trámite personal">Trámite personal</option>
+          <option value="Otra eventualidad">Otra eventualidad</option>
         </select>
+      </div>
+      <div class="field">
+        <label for="eventoDetalle">Detalle (opcional)</label>
+        <input type="text" id="eventoDetalle" placeholder="Ej.: no puede asistir">
+      </div>
+      <button class="primary" id="agregarEventoBtn">Agregar eventualidad</button>
     </div>
+    <div id="listaEventos" class="event-list"></div>
+  </section>
 
-    <div class="panel">
-        <h2>1. Domingos y feriados</h2>
-        <p class="nota">
-            Las casillas aparecen únicamente en domingos y feriados.
-            Marcada significa que trabaja; sin marcar significa que no trabaja.
-            Tocá el encabezado de un día para marcar o quitar un feriado.
-        </p>
-        <div class="scroll">
-            <table id="tablaMarcaciones"></table>
-        </div>
+  <section class="card">
+    <div class="result-title">
+      <div>
+        <h2 style="margin-bottom:5px">4. Planilla mensual</h2>
+        <div id="subtituloPlanilla" class="small">Presioná “Calcular planilla” para generar los turnos.</div>
+      </div>
+      <div class="toolbar no-print">
+        <button class="success" id="excelBtn">Exportar Excel (.xlsx)</button>
+        <button class="secondary" id="csvBtn">Exportar CSV</button>
+      </div>
     </div>
-
-    <div class="panel">
-        <h2>2. Reglas automáticas de francos</h2>
-        <ul class="nota">
-            <li>Si trabaja un domingo, el lunes siguiente es franco obligatorio.</li>
-            <li>Además, el sábado y domingo de la semana siguiente son francos.</li>
-            <li>Si trabaja un feriado de lunes a jueves, el viernes de esa semana se asigna como franco compensatorio.</li>
-            <li>Los francos automáticos no deben coincidir con días en los que se marcó que el operario trabaja: esas situaciones se mostrarán como conflictos para revisar.</li>
-        </ul>
+    <div class="legend">
+      <span><i class="swatch" style="background:#dceafa"></i> Turno asignado</span>
+      <span><i class="swatch" style="background:#dff2e5"></i> Franco</span>
+      <span><i class="swatch" style="background:#fff0d9"></i> Eventualidad</span>
+      <span><i class="swatch" style="background:#fbe2e2"></i> Conflicto</span>
     </div>
+    <div id="resumen" class="small"></div>
+    <div id="avisos"></div>
+    <div id="planilla" class="table-wrap" style="margin-top:12px">
+      <div style="padding:22px;text-align:center;color:#64748b">La planilla mensual aparecerá acá.</div>
+    </div>
+  </section>
 
-    <button onclick="calcular()" class="btn-verde">Calcular turnos y francos</button>
-    <button onclick="exportarCSV()">Exportar planilla CSV</button>
-    <button onclick="reiniciarMes()" class="btn-gris">Borrar marcaciones del mes</button>
+  <section class="card">
+    <h2>Reglas horarias</h2>
+    <div class="employee-grid">
+      <div class="employee-card"><strong>Pace</strong><span class="pill pill-blue">Salida máxima 18:00</span><p class="small">Si está disponible, se prioriza el inicio a las 06:00 cuando las restricciones lo permiten.</p></div>
+      <div class="employee-card"><strong>Videla</strong><span class="pill pill-blue">Salida máxima 22:00</span><p class="small">Si comienza a las 06:00, se verifica la salida del turno anterior.</p></div>
+      <div class="employee-card"><strong>Mansilla</strong><span class="pill pill-green">Sin restricción horaria</span></div>
+      <div class="employee-card"><strong>Carrizo</strong><span class="pill pill-green">Sin restricción horaria</span></div>
+    </div>
+    <p class="small">La asignación automática intenta cubrir las 24 horas. Si las disponibilidades o las restricciones no lo permiten, se informa el conflicto; no se garantiza una cobertura válida cuando las reglas son incompatibles.</p>
+  </section>
+</main>
+<footer>Macrodesk · Planificador mensual de turnos</footer>
 
-    <div id="resultado"></div>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script>
 "use strict";
 
-const ANIO = 2026;
-const MESES = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-];
-const DIAS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+const OPERARIOS = ["Pace", "Videla", "Mansilla", "Carrizo"];
+const STORAGE_KEY = "mesPlanificadorGuardado";
+const COLOR = {
+  navy:"142B4A", white:"FFFFFF", blue:"DCEBFA",
+  green:"DFF2E5", orange:"FFF0D9", red:"FBE2E2",
+  grey:"F0F4F9", border:"D8E1EC"
+};
 
-const PERSONAL = [
-    { nombre: "Pace", maxFin: 18 },
-    { nombre: "Videla", maxFin: 22 },
-    { nombre: "Mansilla", maxFin: 30 },
-    { nombre: "Carrizo", maxFin: 30 }
-];
+const $ = id => document.getElementById(id);
+const state = {
+  mes:"",
+  feriados:[],
+  trabajoEspecial:{},
+  eventos:[],
+  resultado:null
+};
 
-let resultados = [];
-let francosCalculados = {};
-let conflictosCalculados = [];
-
-function mesActual() {
-    return Number(document.getElementById("mes").value);
+function parseKey(key) {
+  const [y,m,d] = key.split("-").map(Number);
+  return new Date(y,m-1,d,12,0,0);
 }
-
-function totalDias(mes) {
-    return new Date(ANIO, mes + 1, 0).getDate();
+function keyDate(date) {
+  return date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
 }
-
-function fechaDia(mes, dia) {
-    return new Date(ANIO, mes, dia);
+function addDays(key,n) {
+  const d=parseKey(key);
+  d.setDate(d.getDate()+n);
+  return keyDate(d);
 }
-
-function nombreDia(mes, dia) {
-    const f = fechaDia(mes, dia);
-    return `${DIAS[f.getDay()]} ${String(dia).padStart(2, "0")}`;
+function dayCount(month) {
+  const [y,m]=month.split("-").map(Number);
+  return new Date(y,m,0).getDate();
 }
-
-function esDomingo(mes, dia) {
-    return fechaDia(mes, dia).getDay() === 0;
+function monthKeys(month) {
+  const count=dayCount(month);
+  return Array.from({length:count},(_,i)=>month+"-"+String(i+1).padStart(2,"0"));
 }
-
-function esSabado(mes, dia) {
-    return fechaDia(mes, dia).getDay() === 6;
+function isSunday(key){return parseKey(key).getDay()===0}
+function isSaturday(key){return parseKey(key).getDay()===6}
+function isHoliday(key){return state.feriados.includes(key)}
+function isWeekend(key){return isSaturday(key)||isSunday(key)}
+function weekdayName(key){
+  return ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"][parseKey(key).getDay()];
 }
-
-function claveFeriado(mes, dia) {
-    return `macrodesk-turnos-feriado-${ANIO}-${mes}-${dia}`;
+function prettyDate(key){
+  const d=parseKey(key);
+  return d.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"});
 }
-
-function claveTrabajo(mes, dia, nombre) {
-    return `macrodesk-turnos-trabajo-${ANIO}-${mes}-${dia}-${nombre}`;
+function clock(value){
+  const n=((value%24)+24)%24;
+  return String(Math.floor(n)).padStart(2,"0")+":00";
 }
-
-function esFeriado(mes, dia) {
-    return localStorage.getItem(claveFeriado(mes, dia)) === "true";
+function escapeHtml(value){
+  return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
-
-function esDiaEspecial(mes, dia) {
-    return esDomingo(mes, dia) || esFeriado(mes, dia);
+function specialKey(date,person){return date+"|"+person}
+function isChecked(date,person){return !!state.trabajoEspecial[specialKey(date,person)]}
+function setChecked(date,person,value){
+  const k=specialKey(date,person);
+  if(value)state.trabajoEspecial[k]=true;
+  else delete state.trabajoEspecial[k];
+  state.resultado=null;
+  saveState(false);
 }
-
-function trabajaMarcado(mes, dia, nombre) {
-    return localStorage.getItem(claveTrabajo(mes, dia, nombre)) === "true";
+function getEvent(date,person){
+  return state.eventos.find(e=>e.fecha===date&&e.operario===person);
 }
-
-function cambiarFeriado(dia) {
-    const mes = mesActual();
-    const key = claveFeriado(mes, dia);
-
-    if (esFeriado(mes, dia)) {
-        localStorage.removeItem(key);
-    } else {
-        localStorage.setItem(key, "true");
+function getEvents(date,person){
+  return state.eventos.filter(e=>e.fecha===date&&e.operario===person);
+}
+function isAutoOff(date,person,workFlags){
+  return (workFlags.off.get(date)||new Set()).has(person);
+}
+function setOf(map,key){
+  if(!map.has(key))map.set(key,new Set());
+  return map.get(key);
+}
+function buildAutoRules(keys){
+  const off=new Map();
+  const causes=new Map();
+  const addOff=(date,person,reason)=>{
+    setOf(off,date).add(person);
+    const k=date+"|"+person;
+    if(!causes.has(k))causes.set(k,[]);
+    causes.get(k).push(reason);
+  };
+  for(const sunday of keys.filter(isSunday)){
+    for(const person of OPERARIOS){
+      if(!isChecked(sunday,person))continue;
+      addOff(addDays(sunday,1),person,"Franco compensatorio por domingo trabajado");
+      addOff(addDays(sunday,6),person,"Descanso del fin de semana posterior");
+      addOff(addDays(sunday,7),person,"Descanso del fin de semana posterior");
     }
-
-    dibujarMarcaciones();
-    document.getElementById("resultado").innerHTML = "";
-    resultados = [];
-}
-
-function cambiarTrabajo(dia, nombre, checked) {
-    const mes = mesActual();
-    localStorage.setItem(claveTrabajo(mes, dia, nombre), checked);
-    document.getElementById("resultado").innerHTML = "";
-    resultados = [];
-}
-
-function cambiarMes() {
-    localStorage.setItem("macrodesk-turnos-mes", mesActual());
-    dibujarMarcaciones();
-    document.getElementById("resultado").innerHTML = "";
-    resultados = [];
-}
-
-function dibujarMarcaciones() {
-    const mes = mesActual();
-    const dias = totalDias(mes);
-    let html = "<thead><tr><th>Operario</th>";
-
-    for (let d = 1; d <= dias; d++) {
-        const especial = esDiaEspecial(mes, d);
-        const feriado = esFeriado(mes, d);
-        const clase = feriado
-            ? "dia-feriado"
-            : (esDomingo(mes, d) ? "dia-domingo" : "");
-
-        html += `<th class="cabecera-dia ${clase}"
-                    ${!esDomingo(mes, d) ? `onclick="cambiarFeriado(${d})"` : ""}
-                    title="${esDomingo(mes, d) ? "Domingo" : "Tocar para marcar o quitar feriado"}">
-                    ${nombreDia(mes, d)}
-                    ${feriado ? '<span class="mini">FERIADO</span>' : ""}
-                 </th>`;
+  }
+  for(const holiday of keys.filter(isHoliday)){
+    const dow=parseKey(holiday).getDay();
+    if(dow===0||dow===6)continue;
+    if(dow===5)continue;
+    for(const person of OPERARIOS){
+      if(isChecked(holiday,person)){
+        const friday=addDays(holiday,5-dow);
+        addOff(friday,person,"Franco compensatorio por feriado trabajado");
+      }
     }
-
-    html += "</tr></thead><tbody>";
-
-    PERSONAL.forEach(p => {
-        html += `<tr><td>${p.nombre}</td>`;
-
-        for (let d = 1; d <= dias; d++) {
-            if (!esDiaEspecial(mes, d)) {
-                html += "<td>—</td>";
-                continue;
-            }
-
-            const checked = trabajaMarcado(mes, d, p.nombre);
-            const clase = esFeriado(mes, d)
-                ? "dia-feriado"
-                : "dia-domingo";
-
-            html += `<td class="${clase}">
-                <input type="checkbox"
-                    aria-label="${p.nombre} trabaja el ${nombreDia(mes, d)}"
-                    ${checked ? "checked" : ""}
-                    onchange="cambiarTrabajo(${d}, '${p.nombre}', this.checked)">
-            </td>`;
-        }
-
-        html += "</tr>";
+  }
+  return {off,causes};
+}
+function weekendSelection(date){
+  // Sábado y domingo forman un bloque: basta que se haya marcado
+  // uno de los dos días especiales para vincular ambos.
+  const saturday=isSaturday(date)?date:isSunday(date)?addDays(date,-1):null;
+  if(!saturday)return null;
+  const sunday=addDays(saturday,1);
+  const people=new Set();
+  for(const person of OPERARIOS){
+    if(isChecked(saturday,person)||isChecked(sunday,person))people.add(person);
+  }
+  const marked=people.size>0;
+  const holidayWeekend=isHoliday(saturday)||isHoliday(sunday);
+  const special=marked||isSunday(date)||isHoliday(date)||holidayWeekend;
+  return {saturday,sunday,people,marked,special};
+}
+function isSpecialDate(date){
+  return isSunday(date)||isHoliday(date)||isSaturday(date)&&isHoliday(date);
+}
+function makeSlots(count){
+  if(count<=0)return [];
+  const length=24/count;
+  return Array.from({length:count},(_,i)=>({
+    start:6+i*length,end:6+(i+1)*length,length
+  }));
+}
+function canTakeSlot(person,slot,previous){
+  const end=slot.end;
+  // Los turnos pueden terminar antes de las 06:00 del día siguiente.
+  // Se rechazan las salidas que exceden el máximo dentro del tramo diurno.
+  const endClock=((end%24)+24)%24;
+  const crossesMidnight=end>=24;
+  if(person==="Pace"){
+    if(!crossesMidnight && endClock>18)return false;
+    if(end===24)return false;
+  }
+  if(person==="Videla"){
+    if(!crossesMidnight && endClock>22)return false;
+    if(end===24)return false;
+    if(slot.start===6 && previous && previous.endAbsolute!=null){
+      const prevEnd=previous.endAbsolute;
+      // Para el inicio a las 06:00, el turno anterior no debe terminar
+      // después de las 18:00 del tramo operativo anterior.
+      if(prevEnd>18 && prevEnd<30)return false;
+    }
+  }
+  return true;
+}
+function permutations(items){
+  if(items.length<=1)return [items.slice()];
+  const out=[];
+  items.forEach((item,i)=>{
+    const rest=items.slice(0,i).concat(items.slice(i+1));
+    for(const p of permutations(rest))out.push([item,...p]);
+  });
+  return out;
+}
+function chooseAssignments(people,previous){
+  const slots=makeSlots(people.length);
+  if(!people.length)return {assignments:[],slots:[],valid:true};
+  const perms=permutations(people);
+  // Primero se favorece a Pace en el primer turno si puede hacerlo.
+  perms.sort((a,b)=>{
+    const ap=a[0]==="Pace"?-1:0,bp=b[0]==="Pace"?-1:0;
+    return ap-bp;
+  });
+  for(const order of perms){
+    let valid=true;
+    for(let i=0;i<order.length;i++){
+      if(!canTakeSlot(order[i],slots[i],previous.get(order[i]))){valid=false;break;}
+    }
+    if(valid)return {assignments:order.map((person,i)=>({person,slot:slots[i]})),slots,valid:true};
+  }
+  return {
+    assignments:people.map((person,i)=>({person,slot:slots[i]})),
+    slots,valid:false
+  };
+}
+function slotText(slot){
+  return clock(slot.start)+"–"+clock(slot.end);
+}
+function isWorkSelectedOnWeekend(date,person){
+  const w=weekendSelection(date);
+  return !!w&&w.people.has(person);
+}
+function specialPeopleForDay(date){
+  const w=weekendSelection(date);
+  if(w&&w.special)return [...w.people];
+  return OPERARIOS.filter(p=>isChecked(date,p));
+}
+function renderSpecialDays(){
+  const month=state.mes;
+  if(!month){$("diasEspeciales").innerHTML="";return}
+  const keys=monthKeys(month);
+  const special=keys.filter(k=>isSpecialDate(k));
+  $("diasEspeciales").innerHTML=special.map(date=>{
+    const weekend=isWeekend(date);
+    const name=weekdayName(date);
+    const label=isSunday(date)?"Domingo":isSaturday(date)?"Sábado":"Feriado";
+    const linked=weekend?" · Bloque sábado-domingo":"";
+    return `<div class="special-day">
+      <h3>${escapeHtml(label)} ${parseKey(date).getDate()} <span class="small">(${escapeHtml(name)})</span></h3>
+      <div class="small">${escapeHtml(prettyDate(date))}${linked}${isHoliday(date)?" · Feriado":""}</div>
+      <div class="check-list" style="margin-top:12px">
+        ${OPERARIOS.map(person=>`<label class="check-row">
+          <input type="checkbox" data-special-date="${date}" data-person="${person}" ${isChecked(date,person)?"checked":""}>
+          ${person}
+        </label>`).join("")}
+      </div>
+    </div>`;
+  }).join("")||'<p class="small">No hay domingos ni feriados en este mes.</p>';
+  $("diasEspeciales").querySelectorAll("[data-special-date]").forEach(input=>{
+    input.addEventListener("change",()=>{
+      setChecked(input.dataset.specialDate,input.dataset.person,input.checked);
+      renderSpecialDays();
+      renderHolidays();
     });
-
-    html += "</tbody>";
-    document.getElementById("tablaMarcaciones").innerHTML = html;
+  });
 }
-
-/*
- * Genera los francos derivados de las marcaciones.
- *
- * Domingo trabajado:
- *   - lunes inmediatamente posterior;
- *   - sábado y domingo de la semana posterior.
- *
- * Feriado de lunes a jueves trabajado:
- *   - viernes de esa misma semana.
- *
- * Si un franco cae fuera del mes, se conserva su fecha real para poder
- * reconocerlo si se consulta ese día desde el mes correspondiente.
- */
-function generarFrancosAutomaticos(mes) {
-    const dias = totalDias(mes);
-    const francos = {};
-    const conflictos = [];
-
-    function agregarFranco(nombre, fechaObjetivo, motivo, diaOrigen) {
-        const claveFecha =
-            `${fechaObjetivo.getFullYear()}-${fechaObjetivo.getMonth()}-${fechaObjetivo.getDate()}`;
-
-        if (!francos[nombre]) francos[nombre] = {};
-        if (!francos[nombre][claveFecha]) {
-            francos[nombre][claveFecha] = [];
-        }
-
-        francos[nombre][claveFecha].push({
-            motivo,
-            diaOrigen,
-            fecha: new Date(fechaObjetivo)
-        });
-    }
-
-    for (let d = 1; d <= dias; d++) {
-        const fecha = fechaDia(mes, d);
-        const diaSemana = fecha.getDay();
-
-        PERSONAL.forEach(p => {
-            if (!esDiaEspecial(mes, d) || !trabajaMarcado(mes, d, p.nombre)) {
-                return;
-            }
-
-            if (diaSemana === 0) {
-                const lunes = new Date(ANIO, mes, d + 1);
-                const sabadoSiguiente = new Date(ANIO, mes, d + 6);
-                const domingoSiguiente = new Date(ANIO, mes, d + 7);
-
-                agregarFranco(p.nombre, lunes, "Lunes posterior al domingo trabajado", d);
-                agregarFranco(p.nombre, sabadoSiguiente, "Fin de semana compensatorio", d);
-                agregarFranco(p.nombre, domingoSiguiente, "Fin de semana compensatorio", d);
-            } else if (esFeriado(mes, d) && diaSemana >= 1 && diaSemana <= 4) {
-                const viernes = new Date(ANIO, mes, d + (5 - diaSemana));
-                agregarFranco(p.nombre, viernes, "Compensación por feriado trabajado", d);
-            }
-        });
-    }
-
-    // Comprobar si un franco automático coincide con un domingo/feriado
-    // marcado como día de trabajo para la misma persona.
-    for (let d = 1; d <= dias; d++) {
-        if (!esDiaEspecial(mes, d)) continue;
-
-        PERSONAL.forEach(p => {
-            if (!trabajaMarcado(mes, d, p.nombre)) return;
-
-            const fecha = fechaDia(mes, d);
-            const claveFecha =
-                `${fecha.getFullYear()}-${fecha.getMonth()}-${fecha.getDate()}`;
-            const lista = francos[p.nombre]?.[claveFecha];
-
-            if (lista && lista.length) {
-                conflictos.push(
-                    `${p.nombre} figura trabajando el ${nombreDia(mes, d)}, ` +
-                    `pero también tiene un franco automático previsto para ese día.`
-                );
-            }
-        });
-    }
-
-    return { francos, conflictos };
-}
-
-function tieneFrancoAutomatico(francos, nombre, fecha) {
-    const claveFecha =
-        `${fecha.getFullYear()}-${fecha.getMonth()}-${fecha.getDate()}`;
-
-    return Boolean(francos[nombre] && francos[nombre][claveFecha]?.length);
-}
-
-function motivoFranco(francos, nombre, fecha) {
-    const claveFecha =
-        `${fecha.getFullYear()}-${fecha.getMonth()}-${fecha.getDate()}`;
-
-    const lista = francos[nombre]?.[claveFecha] || [];
-    return [...new Set(lista.map(x => x.motivo))].join("; ");
-}
-
-function crearTurnos(disponibles, mes, dia, diaSiguiente) {
-    if (disponibles.length < 2) {
-        return {
-            asignacion: null,
-            error: "Hay menos de dos operarios disponibles."
-        };
-    }
-
-    const horas = 24 / disponibles.length;
-    const configuraciones = [];
-
-    for (let i = 0; i < disponibles.length; i++) {
-        const inicio = 6 + i * horas;
-        const fin = 6 + (i + 1) * horas;
-
-        configuraciones.push({
-            inicio,
-            fin,
-            inicioTexto: horaTexto(inicio),
-            finTexto: horaTexto(fin),
-            finLineal: fin
-        });
-    }
-
-    // Pace inicia a las 06:00 siempre que esté disponible.
-    const permutaciones = permutar(disponibles);
-    let asignacion = null;
-
-    for (const orden of permutaciones) {
-        let valida = true;
-
-        for (let i = 0; i < orden.length; i++) {
-            if (configuraciones[i].finLineal > orden[i].maxFin) {
-                valida = false;
-                break;
-            }
-        }
-
-        const posicionPace = orden.findIndex(p => p.nombre === "Pace");
-        if (posicionPace !== -1 && posicionPace !== 0) valida = false;
-
-        if (!valida) continue;
-
-        // Si Videla inicia a las 06:00 hoy, no debe haber terminado ayer a las 22:00.
-        const posicionVidela = orden.findIndex(p => p.nombre === "Videla");
-        if (
-            posicionVidela === 0 &&
-            dia > 1 &&
-            resultados[dia - 2] &&
-            resultados[dia - 2].Videla === "18:00 a 22:00"
-        ) {
-            continue;
-        }
-
-        asignacion = {};
-
-        for (let i = 0; i < orden.length; i++) {
-            asignacion[orden[i].nombre] =
-                `${configuraciones[i].inicioTexto} a ${configuraciones[i].finTexto}`;
-        }
-
-        break;
-    }
-
-    if (!asignacion) {
-        return {
-            asignacion: null,
-            error: "No se encontró una combinación compatible con las restricciones horarias."
-        };
-    }
-
-    PERSONAL.forEach(p => {
-        if (!(p.nombre in asignacion)) asignacion[p.nombre] = "FRANCO";
+function renderHolidays(){
+  const list=state.feriados.filter(k=>k.startsWith(state.mes)).sort();
+  $("feriadosActuales").innerHTML=list.length
+    ? "Feriados del mes: "+list.map(k=>`${prettyDate(k)} <button class="danger" style="padding:3px 7px;font-size:11px" data-remove-holiday="${k}">Quitar</button>`).join(" · ")
+    : "No agregaste feriados para este mes.";
+  $("feriadosActuales").querySelectorAll("[data-remove-holiday]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      state.feriados=state.feriados.filter(k=>k!==btn.dataset.removeHoliday);
+      state.resultado=null;saveState(false);renderAll();
     });
-
-    return { asignacion, error: null };
+  });
 }
-
-function horaTexto(hora) {
-    const h = ((Math.round(hora) % 24) + 24) % 24;
-    return String(h).padStart(2, "0") + ":00";
+function renderEvents(){
+  const events=state.eventos.slice().sort((a,b)=>a.fecha.localeCompare(b.fecha));
+  $("listaEventos").innerHTML=events.length?events.map((e,i)=>`
+    <div class="event-item">
+      <div><strong>${escapeHtml(e.operario)}</strong> · ${escapeHtml(prettyDate(e.fecha))}<br>
+      <span>${escapeHtml(e.tipo)}${e.detalle?" — "+escapeHtml(e.detalle):""}</span></div>
+      <button class="danger" data-remove-event="${i}">Eliminar</button>
+    </div>`).join(""):'<div class="small">Todavía no hay eventualidades cargadas.</div>';
+  $("listaEventos").querySelectorAll("[data-remove-event]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const item=events[Number(btn.dataset.removeEvent)];
+      state.eventos=state.eventos.filter(e=>!(e.fecha===item.fecha&&e.operario===item.operario&&e.tipo===item.tipo&&e.detalle===item.detalle));
+      state.resultado=null;saveState(false);renderEvents();
+    });
+  });
 }
+function renderAll(){
+  $("mes").value=state.mes;
+  $("eventoOperario").innerHTML=OPERARIOS.map(p=>`<option value="${p}">${p}</option>`).join("");
+  renderSpecialDays();renderHolidays();renderEvents();
+}
+function addEvent(){
+  const fecha=$("eventoFecha").value;
+  const operario=$("eventoOperario").value;
+  const tipo=$("eventoTipo").value;
+  const detalle=$("eventoDetalle").value.trim();
+  if(!fecha){alert("Elegí la fecha de la eventualidad.");return}
+  if(getEvent(fecha,operario)){
+    alert("Ya existe una eventualidad para ese operario en esa fecha. Eliminá la anterior si querés reemplazarla.");
+    return;
+  }
+  state.eventos.push({fecha,operario,tipo,detalle});
+  state.resultado=null;
+  $("eventoDetalle").value="";
+  saveState(false);renderEvents();
+}
+function calculate(){
+  if(!state.mes){alert("Elegí el mes a planificar.");return}
+  const keys=monthKeys(state.mes);
+  const rules=buildAutoRules(keys);
+  const result={month:state.mes,days:[],conflicts:[],summary:{turnos:0,francos:0,ausencias:0,conflictos:0}};
+  const previous=new Map();
+  const weekendPlans=new Map();
 
-function permutar(arr) {
-    if (arr.length <= 1) return [arr.slice()];
+  for(const date of keys){
+    const w=weekendSelection(date);
+    let isWeekendBlock=!!(w&&w.special);
+    let selected=isWeekendBlock?[...w.people]:null;
+    const holiday=isHoliday(date);
+    const sunday=isSunday(date);
+    const saturday=isSaturday(date);
+    const weekdaySpecial=holiday&&!sunday&&!saturday;
+    const special=isWeekendBlock||weekdaySpecial;
 
-    const resultado = [];
+    // Domingo y sábado vinculado usan exactamente el mismo plan de turnos.
+    let plan;
+    if(isWeekendBlock){
+      const pairKey=w.saturday;
+      if(!weekendPlans.has(pairKey)){
+        const sat=w.saturday,sun=w.sunday;
+        const selectedPeople=OPERARIOS.filter(p=>isChecked(sat,p)||isChecked(sun,p));
+        weekendPlans.set(pairKey,chooseAssignments(selectedPeople,previous));
+      }
+      plan=weekendPlans.get(pairKey);
+    }else{
+      const available=OPERARIOS.filter(person=>{
+        if(getEvent(date,person))return false;
+        if(isAutoOff(date,person,rules))return false;
+        if(weekdaySpecial)return isChecked(date,person);
+        return true;
+      });
+      plan=chooseAssignments(available,previous);
+    }
 
-    for (let i = 0; i < arr.length; i++) {
-        const resto = arr.slice(0, i).concat(arr.slice(i + 1));
+    const day={date,assignments:{},notes:[],special,holiday,sunday,saturday,slots:plan.slots};
+    const chosen=new Map(plan.assignments.map(a=>[a.person,a.slot]));
+    for(const person of OPERARIOS){
+      const event=getEvent(date,person);
+      const off=isAutoOff(date,person,rules);
+      const workingSpecial=special&&selected&&selected.includes(person);
+      let slot=chosen.get(person)||null;
+      let status="",text="",fill="",reason="";
 
-        for (const p of permutar(resto)) {
-            resultado.push([arr[i], ...p]);
+      if(event){
+        status="absent";text="AUSENTE";fill="orange";reason=event.tipo+(event.detalle?": "+event.detalle:"");
+        result.summary.ausencias++;
+        if(slot) {
+          result.conflicts.push({date,person,message:"Está marcado para trabajar, pero tiene una eventualidad."});
         }
-    }
-
-    return resultado;
-}
-
-function calcular() {
-    const mes = mesActual();
-    const dias = totalDias(mes);
-    const datos = generarFrancosAutomaticos(mes);
-
-    francosCalculados = datos.francos;
-    conflictosCalculados = datos.conflictos;
-    resultados = [];
-
-    for (let d = 1; d <= dias; d++) {
-        const fecha = fechaDia(mes, d);
-        const especial = esDiaEspecial(mes, d);
-        const disponibles = [];
-
-        PERSONAL.forEach(p => {
-            const trabaja = trabajaMarcado(mes, d, p.nombre);
-            const francoAuto = tieneFrancoAutomatico(
-                francosCalculados,
-                p.nombre,
-                fecha
-            );
-
-            if (especial) {
-                // En domingos/feriados solo trabaja quien fue marcado.
-                if (trabaja && !francoAuto) disponibles.push(p);
-            } else {
-                // En días normales se aplican los francos automáticos.
-                if (!francoAuto) disponibles.push(p);
-            }
-        });
-
-        const resultado = crearTurnos(disponibles, mes, d);
-        const fila = {
-            dia: d,
-            fecha,
-            especial,
-            feriado: esFeriado(mes, d),
-            error: resultado.error,
-            ...Object.fromEntries(PERSONAL.map(p => [p.nombre, "FRANCO"]))
-        };
-
-        if (resultado.asignacion) {
-            Object.assign(fila, resultado.asignacion);
-        } else {
-            PERSONAL.forEach(p => {
-                const trabaja = trabajaMarcado(mes, d, p.nombre);
-                const francoAuto = tieneFrancoAutomatico(
-                    francosCalculados,
-                    p.nombre,
-                    fecha
-                );
-
-                if (especial && trabaja && francoAuto) {
-                    fila[p.nombre] = "CONFLICTO";
-                } else if (especial && !trabaja) {
-                    fila[p.nombre] = "FRANCO";
-                } else if (francoAuto) {
-                    fila[p.nombre] = "FRANCO";
-                } else {
-                    fila[p.nombre] = "SIN ASIGNAR";
-                }
-            });
+      }else if(off){
+        status="off";text="FRANCO";fill="green";
+        reason=(rules.causes.get(date+"|"+person)||["Franco automático"])[0];
+        result.summary.francos++;
+        if(workingSpecial){
+          result.conflicts.push({date,person,message:"El trabajo especial coincide con un franco automático obligatorio."});
         }
+      }else if(special&&!workingSpecial){
+        status="off";text="NO TRABAJA";fill="green";
+      }else if(slot){
+        status="shift";text=slotText(slot);fill="blue";
+        result.summary.turnos++;
+        previous.set(person,{endAbsolute:slot.end});
+      }else if(special){
+        status="off";text="NO TRABAJA";fill="green";
+      }else{
+        status="conflict";text="SIN TURNO";fill="red";
+      }
 
-        resultados.push(fila);
+      day.assignments[person]={status,text,fill,reason,slot};
     }
 
-    mostrarResultados(mes);
+    // Detectar si las restricciones horarias impidieron asignar turnos válidos.
+    if(!plan.valid&&plan.assignments.length){
+      const conflict={date,person:"",message:"No se encontró una combinación que cumpla todas las restricciones horarias para los operarios disponibles."};
+      result.conflicts.push(conflict);
+      day.notes.push(conflict.message);
+      for(const a of plan.assignments){
+        if(day.assignments[a.person]&&day.assignments[a.person].status==="shift"){
+          day.assignments[a.person].status="conflict";
+          day.assignments[a.person].fill="red";
+          day.assignments[a.person].reason="Turno asignado como referencia; revisar restricción horaria.";
+        }
+      }
+    }
+
+    // La ausencia no se cubre automáticamente si eso requiere cambiar un bloque
+    // especial o asignar a alguien que no fue marcado para trabajar.
+    const assigned=Object.values(day.assignments).filter(a=>a.status==="shift").length;
+    const unavailable=OPERARIOS.filter(p=>day.assignments[p].status==="absent").length;
+    const isNoCoverage=special&&selected&&selected.length===0;
+    if(isNoCoverage){
+      result.conflicts.push({date,person:"",message:"Día especial sin operarios marcados para trabajar."});
+    }
+    if(assigned===0&&!isNoCoverage&&!special){
+      result.conflicts.push({date,person:"",message:"No hay operarios disponibles para cubrir el día."});
+    }
+    if(unavailable>0&&assigned<OPERARIOS.length-unavailable&& !special){
+      // Se registra como aviso si la ausencia dejó menos personas disponibles.
+      day.notes.push("Hay una ausencia cargada; revisar si la cobertura de 24 horas sigue completa.");
+    }
+    result.days.push(day);
+  }
+
+  // Marcar conflictos y resumirlos sin ocultar el detalle de cada fecha.
+  result.summary.conflictos=result.conflicts.length;
+  state.resultado=result;
+  renderResult(result);
+  saveState(false);
 }
+function renderResult(result){
+  const days=result.days;
+  $("subtituloPlanilla").textContent="Mes: "+parseKey(days[0].date).toLocaleDateString("es-AR",{month:"long",year:"numeric"})+" · Turnos en formato 24 horas.";
+  $("resumen").innerHTML=`<div class="toolbar">
+    <span class="pill pill-blue">Turnos asignados: ${result.summary.turnos}</span>
+    <span class="pill pill-green">Francos: ${result.summary.francos}</span>
+    <span class="pill pill-orange">Eventualidades: ${result.summary.ausencias}</span>
+    <span class="pill ${result.summary.conflictos?"pill-red":"pill-green"}">Alertas: ${result.summary.conflictos}</span>
+  </div>`;
+  if(result.conflicts.length){
+    const unique=[...new Map(result.conflicts.map(c=>[c.date+"|"+c.person+"|"+c.message,c])).values()];
+    $("avisos").innerHTML=`<div class="status-box status-warn"><strong>Revisar planificación</strong><ul style="margin-bottom:0">${unique.map(c=>`<li>${escapeHtml(prettyDate(c.date))}${c.person?" · "+escapeHtml(c.person):""}: ${escapeHtml(c.message)}</li>`).join("")}</ul></div>`;
+  }else{
+    $("avisos").innerHTML='<div class="status-box status-ok">No se detectaron conflictos automáticos con las reglas configuradas.</div>';
+  }
 
-function mostrarResultados(mes) {
-    const destino = document.getElementById("resultado");
-    let html = `<div class="panel"><h2>3. Resultado de la planificación</h2>`;
-
-    if (conflictosCalculados.length) {
-        html += `<div class="error"><strong>Conflictos de francos:</strong><ul>`;
-        conflictosCalculados.forEach(c => html += `<li>${escapar(c)}</li>`);
-        html += `</ul>Revisá las marcaciones: un día no puede ser simultáneamente de trabajo obligatorio y franco automático.</div>`;
+  let html="<table id='tablaPlanilla'><thead><tr><th>Operario</th>";
+  for(const day of days){
+    const date=day.date;
+    const labels=[];
+    if(day.sunday)labels.push("DOMINGO");
+    if(day.holiday)labels.push("FERIADO");
+    if(isSaturday(date))labels.push("SÁBADO");
+    html+=`<th class="day-head"><span class="day-name">${escapeHtml(weekdayName(date).toUpperCase())}</span><span class="day-num">${parseKey(date).getDate()}</span>${labels.length?`<span class="special-label">${labels.join(" · ")}</span>`:""}</th>`;
+  }
+  html+="</tr></thead><tbody>";
+  for(const person of OPERARIOS){
+    html+=`<tr><td>${escapeHtml(person)}</td>`;
+    for(const day of days){
+      const a=day.assignments[person];
+      const cls=a.status==="shift"?"shift":a.status==="off"?"off":a.status==="absent"?"absent":a.status==="conflict"?"conflict":"unassigned";
+      const title=a.reason?` title="${escapeHtml(a.reason)}"`:"";
+      html+=`<td class="${cls}${isSaturday(day.date)||isSunday(day.date)?" weekend":""}"${title}>${escapeHtml(a.text)}</td>`;
     }
-
-    const diasConError = resultados.filter(r => r.error);
-
-    if (diasConError.length) {
-        html += `<div class="error"><strong>Problemas de cobertura o turnos:</strong><ul>`;
-        diasConError.forEach(r => {
-            html += `<li>${nombreDia(mes, r.dia)}: ${escapar(r.error)}</li>`;
-        });
-        html += `</ul>La asignación se muestra como referencia, pero estos días requieren revisión.</div>`;
-    } else {
-        html += `<div class="ok">La aplicación encontró una asignación para todos los días según las reglas configuradas.</div>`;
+    html+="</tr>";
+  }
+  html+="</tbody></table>";
+  $("planilla").innerHTML=html;
+}
+function saveState(showMessage){
+  try{
+    state.mes=$("mes").value||state.mes;
+    const save={
+      mes:state.mes,feriados:state.feriados,
+      trabajoEspecial:state.trabajoEspecial,eventos:state.eventos
+    };
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(save));
+    if(showMessage)alert("Cambios guardados en este navegador.");
+  }catch(e){
+    if(showMessage)alert("No se pudieron guardar los cambios en este navegador.");
+  }
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const saved=JSON.parse(raw);
+      state.mes=saved.mes||state.mes;
+      state.feriados=Array.isArray(saved.feriados)?saved.feriados:[];
+      state.trabajoEspecial=saved.trabajoEspecial||{};
+      state.eventos=Array.isArray(saved.eventos)?saved.eventos:[];
     }
+  }catch(e){console.warn("No se pudo recuperar la configuración guardada.",e)}
+}
+function addHoliday(){
+  const date=$("nuevoFeriado").value;
+  if(!date){alert("Elegí la fecha del feriado.");return}
+  if(!state.feriados.includes(date))state.feriados.push(date);
+  state.feriados.sort();
+  state.resultado=null;
+  $("nuevoFeriado").value="";
+  saveState(false);renderAll();
+}
+function exportRows(){
+  if(!state.resultado){alert("Primero presioná Calcular planilla.");return null}
+  const result=state.resultado;
+  const rows=[];
+  rows.push(["MACRODESK - PLANIFICADOR MENSUAL"]);
+  rows.push(["Mes",result.month]);
+  rows.push([]);
+  rows.push(["Operario",...result.days.map(d=>{
+    const labels=[String(parseKey(d.date).getDate()),weekdayName(d.date)];
+    if(d.holiday)labels.push("FERIADO");
+    if(d.sunday)labels.push("DOMINGO");
+    if(isSaturday(d.date))labels.push("SÁBADO");
+    return labels.join(" - ");
+  })]);
+  for(const person of OPERARIOS){
+    rows.push([person,...result.days.map(d=>d.assignments[person].text)]);
+  }
+  rows.push([]);
+  rows.push(["LEYENDA"]);
+  rows.push(["Turno asignado","Azul claro"]);
+  rows.push(["Franco","Verde claro"]);
+  rows.push(["Eventualidad / ausencia","Naranja claro"]);
+  rows.push(["Conflicto / revisar","Rojo claro"]);
+  rows.push([]);
+  rows.push(["ALERTAS"]);
+  if(result.conflicts.length){
+    rows.push(["Fecha","Operario","Detalle"]);
+    result.conflicts.forEach(c=>rows.push([prettyDate(c.date),c.person,c.message]));
+  }else rows.push(["Sin conflictos detectados."]);
+  return rows;
+}
+async function exportExcel(){
+  const rows=exportRows();
+  if(!rows)return;
+  if(!window.ExcelJS){
+    alert("No se pudo cargar el exportador Excel. Revisá tu conexión a internet y volvé a intentarlo.");
+    return;
+  }
+  try{
+    const wb=new ExcelJS.Workbook();
+    wb.creator="Macrodesk";
+    wb.subject="Planificador mensual de turnos";
+    wb.created=new Date();
+    const ws=wb.addWorksheet("Planilla mensual");
+    ws.addRows(rows);
+    ws.views=[{state:"frozen",xSplit:1,ySplit:4}];
+    ws.getColumn(1).width=24;
+    for(let i=2;i<=rows[3].length;i++)ws.getColumn(i).width=15;
 
-    html += `<h3>Turnos diarios</h3><div class="scroll"><table><thead><tr><th>Operario</th>`;
+    // Título
+    ws.mergeCells(1,1,1,Math.max(2,rows[3].length));
+    ws.getCell(1,1).font={bold:true,size:16,color:{argb:"FFFFFFFF"}};
+    ws.getCell(1,1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+COLOR.navy}};
+    ws.getCell(1,1).alignment={vertical:"middle"};
+    ws.getRow(1).height=28;
 
-    resultados.forEach(r => {
-        const clase = r.feriado
-            ? "dia-feriado"
-            : (esDomingo(mes, r.dia) ? "dia-domingo" : (esSabado(mes, r.dia) ? "dia-sabado" : ""));
-
-        html += `<th class="${clase}">${nombreDia(mes, r.dia)}${r.feriado ? '<span class="mini">FERIADO</span>' : ""}</th>`;
+    // Cabecera de la planilla
+    const headerRow=4;
+    ws.getRow(headerRow).height=44;
+    ws.getRow(headerRow).eachCell(cell=>{
+      cell.font={bold:true,color:{argb:"FFFFFFFF"},size:10};
+      cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+COLOR.navy}};
+      cell.alignment={horizontal:"center",vertical:"middle",wrapText:true};
+      cell.border={top:{style:"thin",color:{argb:"FF"+COLOR.border}},bottom:{style:"thin",color:{argb:"FF"+COLOR.border}},left:{style:"thin",color:{argb:"FF"+COLOR.border}},right:{style:"thin",color:{argb:"FF"+COLOR.border}}};
     });
-
-    html += `</tr></thead><tbody>`;
-
-    PERSONAL.forEach(p => {
-        html += `<tr><td>${p.nombre}</td>`;
-
-        resultados.forEach(r => {
-            const valor = r[p.nombre] || "FRANCO";
-            const clase = valor === "FRANCO"
-                ? "franco"
-                : (valor === "CONFLICTO" || valor === "SIN ASIGNAR" ? "conflicto" : "turno");
-
-            html += `<td class="${clase}">${escapar(valor)}</td>`;
-        });
-
-        html += `</tr>`;
+    // Colores por tipo de turno
+    for(let r=5;r<5+OPERARIOS.length;r++){
+      ws.getRow(r).eachCell((cell,col)=>{
+        const value=String(cell.value||"");
+        let hex=COLOR.grey;
+        if(col===1)hex=COLOR.grey;
+        else if(value==="FRANCO"||value==="NO TRABAJA")hex=COLOR.green;
+        else if(value==="AUSENTE")hex=COLOR.orange;
+        else if(value==="SIN TURNO")hex=COLOR.red;
+        else if(value.includes("–"))hex=COLOR.blue;
+        cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+hex}};
+        cell.font={bold:col===1||value==="FRANCO"||value==="AUSENTE"||value==="SIN TURNO",color:{argb:"FF"+(hex===COLOR.blue?"174A80":hex===COLOR.green?"246B43":hex===COLOR.orange?"88500C":hex===COLOR.red?"A42626":"1E293B")}};
+        cell.alignment={horizontal:col===1?"left":"center",vertical:"middle",wrapText:true};
+        cell.border={top:{style:"thin",color:{argb:"FF"+COLOR.border}},bottom:{style:"thin",color:{argb:"FF"+COLOR.border}},left:{style:"thin",color:{argb:"FF"+COLOR.border}},right:{style:"thin",color:{argb:"FF"+COLOR.border}}};
+      });
+    }
+    // Fines de semana y feriados destacados en el encabezado
+    state.resultado.days.forEach((day,i)=>{
+      if(day.holiday||day.sunday||isSaturday(day.date)){
+        const cell=ws.getCell(headerRow,i+2);
+        cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF304E73"}};
+      }
     });
-
-    html += `</tbody></table></div>`;
-
-    html += `<h3>Francos automáticos asignados</h3>`;
-
-    const listaFrancos = [];
-
-    for (let d = 1; d <= totalDias(mes); d++) {
-        const fecha = fechaDia(mes, d);
-
-        PERSONAL.forEach(p => {
-            if (tieneFrancoAutomatico(francosCalculados, p.nombre, fecha)) {
-                listaFrancos.push({
-                    nombre: p.nombre,
-                    fecha: nombreDia(mes, d),
-                    motivo: motivoFranco(francosCalculados, p.nombre, fecha)
-                });
-            }
-        });
+    // Formato de la leyenda y alertas
+    const legendRow=5+OPERARIOS.length+1;
+    for(let r=legendRow;r<=ws.rowCount;r++){
+      const val=String(ws.getCell(r,1).value||"");
+      if(val==="Turno asignado")ws.getCell(r,1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+COLOR.blue}};
+      if(val==="Franco")ws.getCell(r,1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+COLOR.green}};
+      if(val==="Eventualidad / ausencia")ws.getCell(r,1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+COLOR.orange}};
+      if(val==="Conflicto / revisar")ws.getCell(r,1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+COLOR.red}};
+      if(val==="LEYENDA"||val==="ALERTAS"){
+        ws.getCell(r,1).font={bold:true,color:{argb:"FFFFFFFF"}};
+        ws.getCell(r,1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+COLOR.navy}};
+      }
     }
-
-    if (listaFrancos.length) {
-        html += `<div class="scroll"><table><thead><tr><th>Operario</th><th>Día de franco</th><th>Motivo</th></tr></thead><tbody>`;
-
-        listaFrancos.forEach(f => {
-            html += `<tr><td>${escapar(f.nombre)}</td><td>${escapar(f.fecha)}</td><td>${escapar(f.motivo)}</td></tr>`;
-        });
-
-        html += `</tbody></table></div>`;
-    } else {
-        html += `<p class="nota">Todavía no hay francos automáticos derivados de las marcaciones del mes.</p>`;
-    }
-
-    html += `<p class="nota">Los francos que caen en el mes siguiente también deben revisarse al planificar ese mes, especialmente cuando el último domingo o feriado trabajado genera descansos posteriores.</p>`;
-    html += `</div>`;
-
-    destino.innerHTML = html;
+    const buffer=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buffer],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;a.download="Macrodesk_Planificador_"+state.mes+".xlsx";
+    document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  }catch(e){
+    console.error(e);
+    alert("Ocurrió un error al generar el Excel. Podés probar la exportación CSV.");
+  }
+}
+function exportCSV(){
+  const rows=exportRows();
+  if(!rows)return;
+  const csv=rows.map(row=>row.map(value=>{
+    const s=String(value??"");
+    return '"'+s.replace(/"/g,'""')+'"';
+  }).join(";")).join("\r\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="Macrodesk_Planificador_"+state.mes+".csv";
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
 }
 
-function escapar(valor) {
-    return String(valor)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-function exportarCSV() {
-    if (!resultados.length) {
-        alert("Primero calculá los turnos.");
-        return;
-    }
-
-    const mes = mesActual();
-    const filas = [];
-    filas.push(["Operario", ...resultados.map(r => nombreDia(mes, r.dia))]);
-
-    PERSONAL.forEach(p => {
-        filas.push([p.nombre, ...resultados.map(r => r[p.nombre] || "FRANCO")]);
-    });
-
-    filas.push([
-        "Feriado",
-        ...resultados.map(r => r.feriado ? "Sí" : "")
-    ]);
-
-    filas.push([
-        "Domingo",
-        ...resultados.map(r => esDomingo(mes, r.dia) ? "Sí" : "")
-    ]);
-
-    const csv = "\uFEFF" + filas.map(fila =>
-        fila.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")
-    ).join("\r\n");
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-
-    a.href = url;
-    a.download = `Macrodesk_Turnos_${MESES[mes]}_${ANIO}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-function reiniciarMes() {
-    if (!confirm("¿Querés borrar todas las marcaciones de trabajo y feriados de este mes?")) {
-        return;
-    }
-
-    const mes = mesActual();
-    const dias = totalDias(mes);
-
-    for (let d = 1; d <= dias; d++) {
-        localStorage.removeItem(claveFeriado(mes, d));
-
-        PERSONAL.forEach(p => {
-            localStorage.removeItem(claveTrabajo(mes, d, p.nombre));
-        });
-    }
-
-    resultados = [];
-    dibujarMarcaciones();
-    document.getElementById("resultado").innerHTML = "";
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-    const guardado = localStorage.getItem("macrodesk-turnos-mes");
-
-    if (guardado !== null) {
-        document.getElementById("mes").value = guardado;
-    } else {
-        document.getElementById("mes").value = "9";
-    }
-
-    dibujarMarcaciones();
+$("mes").addEventListener("change",()=>{
+  state.mes=$("mes").value;
+  state.resultado=null;
+  saveState(false);renderAll();
 });
+$("calcularBtn").addEventListener("click",calculate);
+$("guardarBtn").addEventListener("click",()=>saveState(true));
+$("agregarFeriadoBtn").addEventListener("click",addHoliday);
+$("agregarEventoBtn").addEventListener("click",addEvent);
+$("excelBtn").addEventListener("click",exportExcel);
+$("csvBtn").addEventListener("click",exportCSV);
+$("imprimirBtn").addEventListener("click",()=>window.print());
+
+(function init(){
+  const now=new Date();
+  state.mes=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+  loadState();
+  $("mes").value=state.mes;
+  $("eventoFecha").value=state.mes+"-01";
+  renderAll();
+})();
 </script>
 </body>
 </html>
