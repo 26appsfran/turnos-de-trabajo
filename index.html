@@ -280,6 +280,17 @@ function removeOff(rules,date,person){
  if(set)set.delete(person);
  rules.causes.delete(date+"|"+person);
 }
+ function addOff(rules, date, person, reason) {
+  addToSet(rules.off, date, person);
+
+  const key = date + "|" + person;
+
+  if (!rules.causes.has(key)) {
+    rules.causes.set(key, []);
+  }
+
+  rules.causes.get(key).push(reason);
+}
 function moveHolidayConflictingCompensations(keys,rules,conflicts){
  // Prioridad: trabajar el feriado marcado. El franco se traslada
  // al día hábil anterior más próximo al fin de semana libre.
