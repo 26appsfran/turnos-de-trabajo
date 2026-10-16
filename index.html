@@ -745,7 +745,41 @@ $("mes").addEventListener("change",()=>{
  $("eventoFecha").value=state.mes+"-01";
  saveState(false);renderAll();
 });
-$("calcularBtn").addEventListener("click",calculate);
+$("calcularBtn").addEventListener("click", function () {
+  const boton = $("calcularBtn");
+  const planilla = $("planilla");
+  boton.disabled = true;
+  boton.textContent = "Calculando...";
+
+  try {
+    calculate();
+
+    if (!state.resultado || !state.resultado.days ||
+        state.resultado.days.length === 0) {
+      throw new Error("El cálculo terminó sin generar los días de la planilla.");
+    }
+
+    if (!document.querySelector("#tablaPlanilla")) {
+      throw new Error("Se calcularon los turnos, pero no se pudo dibujar la tabla.");
+    }
+  } catch (error) {
+    console.error("Error al generar la planilla Macrodesk:", error);
+
+    planilla.innerHTML =
+      '<div class="status error">' +
+      '<strong>No se pudo generar la planilla.</strong><br>' +
+      'Detalle: ' +
+      String(error.message || error).replace(/[&<>"]/g, function (c) {
+        return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
+      }) +
+      '</div>';
+
+    alert("Error al generar la planilla: " + (error.message || error));
+  } finally {
+    boton.disabled = false;
+    boton.textContent = "Calcular planilla";
+  }
+});
 $("guardarBtn").addEventListener("click",()=>saveState(true));
 $("agregarFeriadoBtn").addEventListener("click",addHoliday);
 $("agregarEventoBtn").addEventListener("click",addEvent);
