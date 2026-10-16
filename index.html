@@ -61,7 +61,6 @@ td.off{background:var(--green);color:var(--greenText);font-weight:bold}
 td.absent{background:var(--orange);color:#88500c;font-weight:bold}
 td.conflict{background:var(--red);color:#a42626;font-weight:bold}
 td.weekend{border-left:2px solid #9ab7da}
-td.trace{white-space:pre-line;min-width:112px;font-size:10px;line-height:1.4}
 .event-list{display:grid;gap:8px;margin-top:12px}
 .event-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border:1px solid #f2dfbd;background:#fff7e9;border-radius:8px;font-size:12px}
 .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin:12px 0}
@@ -91,7 +90,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:16px}
  <div class="header-inner">
   <div class="brand">MACRODESK</div>
   <h1>Planificador mensual de turnos</h1>
-  <p>Turnos automáticos · Francos · Trazabilidad · Eventualidades · Exportación</p>
+  <p>Turnos automáticos · Francos · Eventualidades · Exportación</p>
  </div>
 </header>
 <main>
@@ -109,7 +108,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:16px}
 
 <section class="card">
  <h2>2. Domingos y feriados</h2>
- <p class="small">Marcá quién trabaja en cada domingo o feriado. Un domingo trabajado vincula también el sábado anterior. Genera franco compensatorio el lunes siguiente y descanso el fin de semana posterior.</p>
+ <p class="small">Marcá quién trabaja en cada domingo o feriado. Un domingo trabajado vincula también el sábado anterior para la asignación del turno. Se asigna franco compensatorio el lunes siguiente y descanso el fin de semana posterior.</p>
  <div class="toolbar" style="margin:12px 0">
   <div class="field"><label for="nuevoFeriado">Fecha del feriado</label><input type="date" id="nuevoFeriado"></div>
   <button class="secondary" id="agregarFeriadoBtn">Agregar feriado</button>
@@ -160,7 +159,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:16px}
   <div class="employee-card"><strong>Mansilla</strong><span class="pill pill-green">Rotación nocturna</span><p class="small">Puede cubrir el último turno nocturno cuando corresponde.</p></div>
   <div class="employee-card"><strong>Carrizo</strong><span class="pill pill-green">Rotación nocturna</span><p class="small">Puede cubrir el último turno nocturno cuando corresponde.</p></div>
  </div>
- <p class="small">Regla de cobertura: se busca que trabajen al menos dos operarios por día. Si las restricciones no lo permiten, se informa el conflicto para revisión.</p>
+ <p class="small">Los avisos deben revisarse antes de publicar la planilla definitiva. El sistema informa conflictos cuando no encuentra una asignación válida.</p>
 </section>
 </main>
 <footer>Macrodesk · Planificador mensual</footer>
@@ -197,7 +196,6 @@ function isWeekend(k){return isSunday(k)||isSaturday(k)}
 function isHoliday(k){return state.feriados.includes(k)}
 function weekday(k){return ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"][dow(k)]}
 function pretty(k){return dateOf(k).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"})}
-function shortDate(k){return dateOf(k).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"})}
 function clock(n){
  const x=((n%24)+24)%24;
  return String(Math.floor(x)).padStart(2,"0")+":00";
@@ -212,28 +210,19 @@ function addToSet(map,key,value){
  if(!map.has(key))map.set(key,new Set());
  map.get(key).add(value);
 }
-
-/*
- * La trazabilidad se guarda separada de la causa del descanso.
- * Clave: fecha del franco + operario.
- * Cada registro conserva fecha de origen, motivo y fecha efectiva.
- */
 function buildRules(keys){
  const off=new Map(),causes=new Map(),compensatory=new Map();
-
  function addOff(date,person,reason){
   addToSet(off,date,person);
   const k=date+"|"+person;
   if(!causes.has(k))causes.set(k,[]);
-  if(!causes.get(k).includes(reason))causes.get(k).push(reason);
+  causes.get(k).push(reason);
  }
- function addComp(date,person,origin,reason){
+ function addComp(date,person,reason){
   const k=date+"|"+person;
   if(!compensatory.has(k))compensatory.set(k,[]);
-  compensatory.get(k).push({date,person,origin,reason});
-  addOff(date,person,"Franco compensatorio: "+reason);
+  compensatory.get(k).push(reason);
  }
-
  // Domingo trabajado: lunes compensatorio y fin de semana posterior libre.
  for(const sunday of keys.filter(isSunday)){
   for(const p of OPERARIOS){
@@ -241,23 +230,23 @@ function buildRules(keys){
    const monday=addDays(sunday,1);
    const nextSaturday=addDays(sunday,6);
    const nextSunday=addDays(sunday,7);
-   addComp(monday,p,sunday,"Domingo trabajado");
-   addOff(nextSaturday,p,"Descanso del fin de semana posterior al domingo trabajado "+pretty(sunday));
-   addOff(nextSunday,p,"Descanso del fin de semana posterior al domingo trabajado "+pretty(sunday));
+   addComp(monday,p,"Domingo trabajado");
+   addOff(monday,p,"Franco compensatorio por domingo trabajado");
+   addOff(nextSaturday,p,"Descanso del fin de semana posterior");
+   addOff(nextSunday,p,"Descanso del fin de semana posterior");
   }
  }
-
- // Feriado trabajado de lunes a jueves: franco compensatorio el viernes.
+ // Feriado trabajado de lunes a jueves: compensatorio viernes.
  for(const holiday of keys.filter(isHoliday)){
   const d=dow(holiday);
   if(d===0||d===6||d===5)continue;
   for(const p of OPERARIOS){
    if(!checked(holiday,p))continue;
    const friday=addDays(holiday,5-d);
-   addComp(friday,p,holiday,"Feriado trabajado");
+   addComp(friday,p,"Feriado trabajado");
+   addOff(friday,p,"Franco compensatorio por feriado trabajado");
   }
  }
-
  return {off,causes,compensatory,addOff};
 }
 function removeOff(rules,date,person){
@@ -265,46 +254,30 @@ function removeOff(rules,date,person){
  if(set)set.delete(person);
  rules.causes.delete(date+"|"+person);
 }
-function getCompFor(rules,date,person){
- return rules.compensatory.get(date+"|"+person)||[];
-}
-function moveCompensatory(rules,from,to,person,origin,reason){
- removeOff(rules,from,person);
- rules.addOff(to,person,"Franco compensatorio trasladado. Origen: "+pretty(origin)+". Motivo: "+reason);
- const old=getCompFor(rules,from,person);
- rules.compensatory.set(from,old.filter(x=>!(x.origin===origin&&x.reason===reason)));
- const k=to+"|"+person;
- if(!rules.compensatory.has(k))rules.compensatory.set(k,[]);
- rules.compensatory.get(k).push({date:to,person,origin,reason,trasladado:true});
-}
 function moveHolidayConflictingCompensations(keys,rules,conflicts){
- /*
-  * El turno marcado en un feriado tiene prioridad.
-  * Si un compensatorio cae ese mismo día por otra regla, intenta reubicarlo
-  * en un día hábil anterior al fin de semana asociado, conservando el origen.
-  */
+ // El trabajo marcado en el feriado tiene prioridad. Se intenta mover
+ // el franco a un día hábil anterior al fin de semana libre.
  for(const date of keys.filter(isHoliday)){
   for(const person of OPERARIOS){
    if(!checked(date,person)||!rules.off.get(date)?.has(person))continue;
-   const reasons=rules.causes.get(date+"|"+person)||[];
-   const compReason=reasons.find(x=>x.includes("Franco compensatorio"));
-   if(!compReason)continue;
-   const records=getCompFor(rules,date,person);
-   const record=records[0];
-   if(!record)continue;
+   removeOff(rules,date,person);
+   const comp=(rules.compensatory.get(date+"|"+person)||[])[0]||"Franco compensatorio";
+   const sunday=keys.filter(isSunday).find(s=>s>=date&&
+    rules.off.get(addDays(s,6))?.has(person)&&rules.off.get(addDays(s,7))?.has(person));
+   const target=sunday||keys.filter(isSunday).find(s=>s>date);
    let moved=false;
-   for(let offset=1;offset<=7;offset++){
-    const candidate=addDays(date,-offset);
-    if(!candidate.startsWith(state.mes))continue;
-    if(isWeekend(candidate)||isHoliday(candidate))continue;
-    if(eventAt(candidate,person)||checked(candidate,person))continue;
-    if(rules.off.get(candidate)?.has(person))continue;
-    moveCompensatory(rules,date,candidate,person,record.origin,record.reason);
-    moved=true;break;
+   if(target){
+    for(let offset=2;offset<=6;offset++){
+     const candidate=addDays(target,-offset);
+     if(!candidate.startsWith(state.mes))continue;
+     if(isWeekend(candidate)||isHoliday(candidate))continue;
+     if(eventAt(candidate,person)||checked(candidate,person))continue;
+     if(rules.off.get(candidate)?.has(person))continue;
+     rules.addOff(candidate,person,"Franco trasladado: "+comp);
+     moved=true;break;
+    }
    }
-   if(!moved){
-    conflicts.push({date,person,message:"Trabaja el feriado, pero el franco compensatorio coincidente no pudo reubicarse en un día hábil. Revisar manualmente."});
-   }
+   if(!moved)conflicts.push({date,person,message:"Debe trabajar el feriado, pero no se encontró un día hábil válido para trasladar el franco compensatorio."});
   }
  }
 }
@@ -318,10 +291,11 @@ function weekendInfo(date){
 function isSpecialDate(date){return isSunday(date)||isHoliday(date)}
 
 /*
- Horarios base:
- 4 personas: 06-12, 12-18, 18-00 y 00-06.
- 3 personas: 06-14, 14-22 y 22-06.
- 2 personas: 06-18 y 18-06.
+  Horarios base:
+  4 personas: 06-12, 12-18, 18-00 y 00-06.
+  3 personas: 06-14, 14-22 y 22-06.
+  2 personas: 06-18 y 18-06.
+  Una sola persona no cubre de manera realista las 24 horas.
 */
 function makeSlots(n){
  if(n===4)return [
@@ -366,6 +340,8 @@ function makePlan(people,previous,forceNight){
  const slots=makeSlots(people.length);
  if(!slots.length)return {assignments:[],valid:false};
 
+ // Si corresponde rotación nocturna, Mansilla o Carrizo ocupa el último turno.
+ let orderedSlots=slots.slice();
  if(forceNight&&people.includes(forceNight)){
   const nightSlot=slots[slots.length-1];
   const others=slots.slice(0,-1);
@@ -373,14 +349,15 @@ function makePlan(people,previous,forceNight){
   for(const order of permutations(rest)){
    const assignments=[{person:forceNight,slot:nightSlot}];
    order.forEach((person,i)=>assignments.push({person,slot:others[i]}));
-   if(assignments.every(a=>allowed(a.person,a.slot,previous.get(a.person))){
+   if(assignments.every(a=>allowed(a.person,a.slot,previous.get(a.person)))){
     return {assignments,valid:true};
    }
   }
+  // No se encontró una combinación que respete todas las restricciones.
   return {assignments:[{person:forceNight,slot:nightSlot},...rest.map((person,i)=>({person,slot:others[i]}))],valid:false};
  }
  for(const order of permutations(people)){
-  const assignments=order.map((person,i)=>({person,slot:slots[i]}));
+  const assignments=order.map((person,i)=>({person,slot:orderedSlots[i]}));
   if(assignments.every(a=>allowed(a.person,a.slot,previous.get(a.person)))){
    return {assignments,valid:true};
   }
@@ -442,75 +419,18 @@ function addEvent(){
  state.eventos.push({fecha,operario,tipo:$("eventoTipo").value,detalle:$("eventoDetalle").value.trim()});
  $("eventoDetalle").value="";state.resultado=null;saveState(false);renderEvents();
 }
-
-/*
- * Prioridad de viernes:
- * Si hay más de dos personas bloqueadas por francos automáticos, intenta
- * mantener el franco de quienes tienen libre el sábado y domingo siguientes.
- * Si no hay suficientes personas disponibles, intenta recuperar francos
- * automáticos de personas que no tienen libre todo el fin de semana.
- * La decisión queda registrada como alerta para revisión.
- */
-function enforceFridayCoverage(keys,rules,conflicts){
- for(const date of keys){
-  if(dow(date)!==5)continue;
-  const saturday=addDays(date,1),sunday=addDays(date,2);
-  const nextWeekendFree=p=>rules.off.get(saturday)?.has(p)&&rules.off.get(sunday)?.has(p);
-  let working=OPERARIOS.filter(p=>!rules.off.get(date)?.has(p)&&!eventAt(date,p));
-  if(working.length>=2)continue;
-
-  const candidates=OPERARIOS.filter(p=>
-   rules.off.get(date)?.has(p)&&!eventAt(date,p)&&!checked(date,p)
-  ).sort((a,b)=>{
-   // Primero se recupera para trabajar a quien NO tiene libre el fin de semana.
-   return Number(!!nextWeekendFree(a))-Number(!!nextWeekendFree(b));
-  });
-
-  for(const p of candidates){
-   if(working.length>=2)break;
-   const records=getCompFor(rules,date,p);
-   if(records.length){
-    const rec=records[0];
-    let moved=false;
-    // Busca otro día hábil para preservar el compensatorio y su origen.
-    for(let offset=1;offset<=5;offset++){
-     const candidate=addDays(date,offset);
-     if(!candidate.startsWith(state.mes))continue;
-     if(isWeekend(candidate)||isHoliday(candidate))continue;
-     if(eventAt(candidate,p)||checked(candidate,p))continue;
-     if(rules.off.get(candidate)?.has(p))continue;
-     moveCompensatory(rules,date,candidate,p,rec.origin,rec.reason);
-     moved=true;break;
-    }
-    if(!moved){
-     // No elimina el derecho al franco: se alerta para decisión manual.
-     conflicts.push({date,person:p,message:"El viernes hay menos de dos personas disponibles. Su franco compensatorio no pudo trasladarse automáticamente; requiere revisión."});
-     continue;
-    }
-   }else{
-    removeOff(rules,date,p);
-    rules.addOff(date,p,"Franco automático reprogramado por cobertura mínima del viernes");
-   }
-   working=OPERARIOS.filter(person=>!rules.off.get(date)?.has(person)&&!eventAt(date,person));
-  }
-  if(working.length<2){
-   conflicts.push({date,person:"",message:"No se pudo garantizar la cobertura mínima de dos operarios el viernes. Revisar francos y eventualidades."});
-  }
- }
-}
 function calculate(){
  if(!state.mes){alert("Elegí el mes a planificar.");return}
  const keys=monthKeys(state.mes),conflicts=[];
  const rules=buildRules(keys);
  moveHolidayConflictingCompensations(keys,rules,conflicts);
- enforceFridayCoverage(keys,rules,conflicts);
-
  const result={month:state.mes,days:[],conflicts,summary:{turnos:0,francos:0,libres:0,ausencias:0,alertas:0}};
  const previous=new Map();
  const weekendPlans=new Map();
- const nightForDate={};
 
- // Se conserva el criterio de rotación nocturna de la versión anterior.
+ // Rotación nocturna: alterna la preferencia entre Mansilla y Carrizo
+ // según quién no trabajó el domingo. No se fuerza a ambos a la vez.
+ const nightForDate={};
  for(const sunday of keys.filter(isSunday)){
   const monday=addDays(sunday,1);
   const nextSunday=addDays(sunday,7);
@@ -537,8 +457,9 @@ function calculate(){
   if(weekend){
    pairKey=w.sat;
    if(!weekendPlans.has(pairKey)){
-    const selected=OPERARIOS.filter(p=>checked(w.sat,p)||checked(w.sun,p));
-    const nightPerson=nightForDate[w.sat]||nightForDate[w.sun]||null;
+    const sat=w.sat,sun=w.sun;
+    const selected=OPERARIOS.filter(p=>checked(sat,p)||checked(sun,p));
+    const nightPerson=nightForDate[sat]||nightForDate[sun]||null;
     weekendPlans.set(pairKey,makePlan(selected,new Map(previous),nightPerson));
    }
    plan=weekendPlans.get(pairKey);
@@ -560,12 +481,9 @@ function calculate(){
    const ev=eventAt(date,p),forcedOff=rules.off.get(date)?.has(p);
    const selected=weekend?people.includes(p):(!isHoliday(date)||checked(date,p));
    const slot=chosen.get(p)||null;
-   let status,text,fill,reason="",compInfo=null;
+   let status,text,fill,reason="";
 
-   const comps=getCompFor(rules,date,p);
-   if(comps.length)compInfo=comps[comps.length-1];
-
-   // El trabajo marcado en un feriado tiene prioridad sobre un franco automático.
+   // El trabajo marcado en un feriado tiene prioridad sobre el franco automático.
    if(isHoliday(date)&&checked(date,p)&&!ev){
     if(forcedOff)removeOff(rules,date,p);
     if(slot){status="shift";text=slotText(slot);fill="blue"}
@@ -576,15 +494,10 @@ function calculate(){
      conflicts.push({date,person:p,message:"Tiene una eventualidad en un día que debía trabajar."});
     }
    }else if(forcedOff){
-    status="off";
-    text=isWeekend(date)?"LIBRE":"FRANCO";
-    fill="green";
-    const reasons=rules.causes.get(date+"|"+p)||["Franco automático"];
-    reason=reasons.join(" · ");
-    if(compInfo){
-     text+="\nOrigen: "+shortDate(compInfo.origin);
-     reason+=". Origen del compensatorio: "+pretty(compInfo.origin)+". Motivo: "+compInfo.reason+
-      (compInfo.trasladado?". Fue trasladado a "+pretty(date)+".":"");
+    status="off";text=isWeekend(date)?"LIBRE":"FRANCO";fill="green";
+    reason=(rules.causes.get(date+"|"+p)||["Franco automático"])[0];
+    if((weekend&&people.includes(p))||(isHoliday(date)&&checked(date,p))){
+     conflicts.push({date,person:p,message:"El descanso automático coincide con un día marcado para trabajar. Revisar el traslado."});
     }
    }else if(special&&!selected){
     status="off";text="LIBRE";fill="green";
@@ -595,9 +508,10 @@ function calculate(){
    }else{
     status="conflict";text="SIN TURNO";fill="red";reason="No hay una asignación válida para esta persona.";
    }
-   day.assignments[p]={status,text,fill,reason,slot,compInfo};
+   day.assignments[p]={status,text,fill,reason,slot};
   }
 
+  // Guarda el último horario de cada persona para revisar descansos entre turnos.
   for(const p of OPERARIOS){
    const a=day.assignments[p];
    if(a.status==="shift")previous.set(p,{end:a.slot.end});
@@ -614,22 +528,21 @@ function calculate(){
     }
    }
   }
-
-  const assigned=Object.values(day.assignments).filter(a=>a.status==="shift").length;
-  if(!special&&assigned<2){
-   conflicts.push({date,person:"",message:"Cobertura inferior a dos operarios: se asignaron "+assigned+". Revisar francos, ausencias y restricciones horarias."});
-  }
   if(special&&people.length===0){
    conflicts.push({date,person:"",message:"No hay operarios marcados para trabajar en este día especial."});
+  }
+  const assigned=Object.values(day.assignments).filter(a=>a.status==="shift").length;
+  if(!special&&assigned===0){
+   conflicts.push({date,person:"",message:"No hay operarios asignados a cubrir este día."});
   }
   result.days.push(day);
  }
 
- result.summary={turnos:0,francos:0,libres:0,ausencias:0,alertas:0};
+ result.summary.turnos=0;result.summary.francos=0;result.summary.libres=0;result.summary.ausencias=0;
  for(const day of result.days)for(const p of OPERARIOS){
   const a=day.assignments[p];
   if(a.status==="shift")result.summary.turnos++;
-  if(a.status==="off"&&a.text.startsWith("FRANCO"))result.summary.francos++;
+  if(a.status==="off"&&a.text==="FRANCO")result.summary.francos++;
   if(a.status==="off"&&a.text==="LIBRE")result.summary.libres++;
   if(a.status==="absent")result.summary.ausencias++;
  }
@@ -669,7 +582,7 @@ function renderResult(result){
   for(const d of days){
    const a=d.assignments[p];
    const cls=a.status==="shift"?"shift":a.status==="off"?"off":a.status==="absent"?"absent":"conflict";
-   html+=`<td class="${cls}${isWeekend(d.date)?" weekend":""}${a.compInfo?" trace":""}" title="${esc(a.reason)}">${esc(a.text)}</td>`;
+   html+=`<td class="${cls}${isWeekend(d.date)?" weekend":""}" title="${esc(a.reason)}">${esc(a.text)}</td>`;
   }
   html+='</tr>';
  }
@@ -719,16 +632,6 @@ function exportRows(){
   return labels.join(" - ");
  })]);
  for(const p of OPERARIOS)rows.push([p,...r.days.map(d=>d.assignments[p].text)]);
- rows.push([]);rows.push(["TRAZABILIDAD DE FRANCOS COMPENSATORIOS"]);
- rows.push(["Operario","Fecha del franco","Fecha de origen","Motivo","Estado"]);
- for(const d of r.days){
-  for(const p of OPERARIOS){
-   const a=d.assignments[p];
-   if(a.compInfo&&a.status==="off"){
-    rows.push([p,pretty(d.date),pretty(a.compInfo.origin),a.compInfo.reason,a.compInfo.trasladado?"Trasladado":"Fecha original"]);
-   }
-  }
- }
  rows.push([]);rows.push(["LEYENDA"]);
  rows.push(["Turno asignado","Azul claro"]);
  rows.push(["Franco / Libre","Verde claro"]);
@@ -747,8 +650,8 @@ async function exportExcel(){
  try{
   const wb=new ExcelJS.Workbook();wb.creator="Macrodesk";wb.subject="Planificador mensual";
   const ws=wb.addWorksheet("Planilla mensual");ws.addRows(rows);
-  ws.views=[{state:"frozen",xSplit:1,ySplit:4}];ws.getColumn(1).width=28;
-  for(let i=2;i<=Math.max(...rows.map(r=>r.length));i++)ws.getColumn(i).width=16;
+  ws.views=[{state:"frozen",xSplit:1,ySplit:4}];ws.getColumn(1).width=24;
+  for(let i=2;i<=rows[3].length;i++)ws.getColumn(i).width=14;
   ws.mergeCells(1,1,1,Math.max(2,rows[3].length));
   ws.getCell(1,1).font={bold:true,size:16,color:{argb:"FFFFFFFF"}};
   ws.getCell(1,1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+C.navy}};
@@ -758,11 +661,11 @@ async function exportExcel(){
    cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+C.navy}};
    cell.alignment={horizontal:"center",vertical:"middle",wrapText:true};
   });
-  for(let r=5;r<=4+OPERARIOS.length;r++){
+  for(let r=5;r<5+OPERARIOS.length;r++){
    ws.getRow(r).eachCell((cell,col)=>{
     const v=String(cell.value||"");let color=C.grey,text="1E293B";
     if(col>1&&v.includes("–")){color=C.blue;text="174A80"}
-    else if(v.startsWith("FRANCO")||v==="LIBRE"){color=C.green;text="246B43"}
+    else if(v==="FRANCO"||v==="LIBRE"){color=C.green;text="246B43"}
     else if(v==="AUSENTE"){color=C.orange;text="88500C"}
     else if(v==="SIN TURNO"||v==="REVISAR"){color=C.red;text="A42626"}
     cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+color}};
@@ -771,9 +674,12 @@ async function exportExcel(){
     cell.border={top:{style:"thin",color:{argb:"FF"+C.border}},bottom:{style:"thin",color:{argb:"FF"+C.border}},left:{style:"thin",color:{argb:"FF"+C.border}},right:{style:"thin",color:{argb:"FF"+C.border}}};
    });
   }
-  for(let r=1;r<=ws.rowCount;r++){
+  const legend=5+OPERARIOS.length+1;
+  for(let r=legend;r<=ws.rowCount;r++){
    const v=String(ws.getCell(r,1).value||"");
-   if(v==="TRAZABILIDAD DE FRANCOS COMPENSATORIOS"||v==="LEYENDA"||v==="ALERTAS"){
+   const map={"Turno asignado":C.blue,"Franco / Libre":C.green,"Eventualidad / ausencia":C.orange,"Conflicto / revisar":C.red};
+   if(map[v])ws.getCell(r,1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+map[v]}};
+   if(v==="LEYENDA"||v==="ALERTAS"){
     ws.getCell(r,1).font={bold:true,color:{argb:"FFFFFFFF"}};
     ws.getCell(r,1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF"+C.navy}};
    }
@@ -833,4 +739,3 @@ $("imprimirBtn").addEventListener("click",()=>window.print());
 </script>
 </body>
 </html>
-
