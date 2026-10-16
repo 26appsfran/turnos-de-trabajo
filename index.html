@@ -1,273 +1,137 @@
 <!DOCTYPE html>
-
 <html lang="es">
-
 <head>
-
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>Macrodesk | Planificador mensual</title>
-
 <style>
-
 :root{--navy:#12233f;--blue:#2463eb;--green:#16866a;--orange:#e58a25;--red:#c83e4d;--bg:#f3f6fb;--line:#dce4ef;--ink:#1c2b43;--muted:#64748b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.wrap{max-width:1500px;margin:auto;padding:20px}.hero{background:linear-gradient(120deg,var(--navy),#244b7b);color:white;padding:24px;border-radius:18px;margin-bottom:18px;box-shadow:0 8px 24px #12233f1a}.hero h1{margin:0 0 5px;font-size:clamp(24px,4vw,34px)}.hero p{margin:0;color:#d8e5f8}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.card{background:white;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 3px 12px #13284908;min-width:0}.span4{grid-column:span 4}.span6{grid-column:span 6}.span8{grid-column:span 8}.span12{grid-column:span 12}h2{font-size:18px;margin:0 0 12px;color:var(--navy)}h3{font-size:15px;margin:12px 0 8px}label{display:block;font-weight:650;font-size:13px;margin:0 0 5px;color:#43536b}input,select,textarea,button{font:inherit}input[type=text],input[type=date],input[type=month],select,textarea{width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:9px;background:white;color:var(--ink)}input[type=checkbox]{accent-color:var(--blue);width:16px;height:16px}.row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.field{flex:1;min-width:130px}.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button{border:0;border-radius:9px;padding:10px 14px;background:var(--blue);color:white;font-weight:700;cursor:pointer}button.secondary{background:#e8eef8;color:var(--navy)}button.green{background:var(--green)}button.danger{background:#fde9eb;color:#a32334}button:hover{filter:brightness(.96)}.muted,.help{color:var(--muted);font-size:12px}.list{display:grid;gap:8px}.item{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;border:1px solid var(--line);border-radius:10px}.item .grow{flex:1;min-width:0}.tag{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800;background:#e8eef8;color:#28456e}.tag.red{background:#fde9eb;color:#a32334}.tag.green{background:#e1f5ec;color:#116b52}.scroll{overflow:auto;max-width:100%}table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}th,td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top;min-width:105px}th{background:#eaf0f8;color:var(--navy);position:sticky;top:0;z-index:1}td:first-child,th:first-child{position:sticky;left:0;z-index:2;background:#f5f8fc;min-width:145px}th:first-child{z-index:3}.shift{font-weight:750}.off{color:#64748b;background:#f3f5f8}.comp{background:#fff2d9;color:#7b4a00}.event{background:#fde9eb;color:#9c2431}.summary{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}.metric{padding:10px 13px;background:#f2f6fc;border-radius:10px;min-width:120px}.metric strong{display:block;font-size:20px;color:var(--navy)}.alerts{display:grid;gap:6px}.alert{padding:9px 11px;border-radius:9px;background:#fff3dc;color:#7b4a00}.alert.error{background:#fde9eb;color:#9c2431}.empty{padding:16px;color:var(--muted);background:#f7f9fc;border-radius:10px}.inline{display:flex;align-items:center;gap:8px}.hidden{display:none!important}@media(max-width:900px){.span4,.span6,.span8{grid-column:span 12}.wrap{padding:12px}.card{padding:14px}}@media print{body{background:white}.wrap{max-width:none;padding:0}.hero{background:white;color:black;box-shadow:none;padding:0}.hero p{color:#333}.no-print,.card.config{display:none!important}.card{box-shadow:none;border:0;padding:4px}.scroll{overflow:visible}table{font-size:9px}th,td{min-width:70px;padding:4px}td:first-child,th:first-child{position:static}}
-
 </style>
-
 </head>
-
 <body><main class="wrap">
-
 <header class="hero"><h1>Macrodesk | Planificador mensual</h1><p>Planificación de turnos, francos, compensatorios y eventualidades.</p></header>
-
 <div class="grid">
-
 <section class="card config span4"><h2>⚙️ Configuración mensual</h2><div class="field"><label for="mes">Mes a planificar</label><input type="month" id="mes"></div><p class="help">Los sábados y domingos se vinculan como un mismo bloque de fin de semana. Las fechas especiales se cargan para el mes elegido.</p><div class="btns"><button id="calcularBtn">Calcular plan</button><button id="guardarBtn" class="secondary">Guardar datos</button></div><p id="saveStatus" class="muted"></p></section>
-
 <section class="card config span4"><h2>🗓️ Domingos y feriados trabajados</h2><p class="help">Marcá quién trabaja en cada domingo o feriado. Si se trabaja el domingo, se contempla el lunes compensatorio y el fin de semana siguiente libre.</p><div id="specialDays" class="list"></div></section>
-
 <section class="card config span4"><h2>➕ Agregar feriado</h2><div class="row"><div class="field"><label for="feriadoFecha">Fecha</label><input type="date" id="feriadoFecha"></div><div class="field"><label for="feriadoNombre">Descripción</label><input type="text" id="feriadoNombre" placeholder="Nombre del feriado"></div></div><div class="btns"><button id="agregarFeriadoBtn" class="green">Agregar feriado</button></div><div id="holidayList" class="list" style="margin-top:10px"></div></section>
-
 <section class="card config span12"><h2>📝 Eventualidades y ausencias</h2><div class="row"><div class="field"><label for="eventoFecha">Fecha</label><input type="date" id="eventoFecha"></div><div class="field"><label for="eventoOperario">Operario</label><select id="eventoOperario"></select></div><div class="field"><label for="eventoTipo">Tipo</label><select id="eventoTipo"><option value="Ausencia">Ausencia</option><option value="Licencia">Licencia</option><option value="Capacitación">Capacitación</option><option value="Otro">Otro</option></select></div><div class="field"><label for="eventoDetalle">Detalle</label><input type="text" id="eventoDetalle" placeholder="Motivo o aclaración"></div><button id="agregarEventoBtn" class="green">Agregar</button></div><div id="eventList" class="list" style="margin-top:12px"></div></section>
-
 <section class="card span12"><h2>📊 Plan mensual</h2><div id="summary" class="summary"></div><div id="alerts" class="alerts"></div><div id="result" class="scroll" style="margin-top:12px"><div class="empty">Elegí el mes y presioná «Calcular plan».</div></div><div class="btns no-print"><button id="excelBtn">Exportar Excel</button><button id="csvBtn" class="secondary">Exportar CSV</button><button id="imprimirBtn" class="secondary">Imprimir / PDF</button></div></section>
-
 <section class="card span12"><h2>📌 Reglas de asignación</h2><ul><li>Con cuatro operarios: 06–12, 12–18, 18–00 y 00–06.</li><li>Con tres: 06–14, 14–22 y 22–06. Con dos: 06–18 y 18–06.</li><li>Pace no termina después de las 18:00; Videla no termina después de las 22:00.</li><li>Los francos compensatorios se asignan en días hábiles, nunca sábado o domingo, y conservan fecha de origen y motivo.</li><li>Los viernes se prioriza el franco de quienes tienen libre el sábado y domingo inmediatamente posteriores.</li><li>El plan intenta mantener al menos dos operarios trabajando por día. Si las restricciones cargadas lo impiden, se informa el conflicto en vez de ocultarlo.</li></ul></section>
-
 </div></main>
-
 <script>
-
 'use strict';
-
 const OPERARIOS=['Pace','Videla','Mansilla','Carrizo'];
-
 const STORAGE_KEY='macrodesk_planificador_v2';
-
 const $=id=>document.getElementById(id);
-
 let state={mes:'',feriados:[],trabajoEspecial:{},eventos:[],resultado:null};
-
 const pad=n=>String(n).padStart(2,'0');
-
 function dateOf(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d,12)}
-
 function keyOf(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
-
 function addDays(s,n){const d=dateOf(s);d.setDate(d.getDate()+n);return keyOf(d)}
-
 function monthKeys(m){if(!m)return[];const [y,mo]=m.split('-').map(Number),n=new Date(y,mo,0).getDate();return Array.from({length:n},(_,i)=>`${m}-${pad(i+1)}`)}
-
 function dow(s){return dateOf(s).getDay()}function isSunday(s){return dow(s)===0}function isSaturday(s){return dow(s)===6}function isWeekend(s){return isSaturday(s)||isSunday(s)}
-
 function weekday(s){return ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'][dow(s)]}
-
 function pretty(s){return `${pad(dateOf(s).getDate())}/${pad(dateOf(s).getMonth()+1)}/${dateOf(s).getFullYear()}`}
-
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-
 function holiday(s){return state.feriados.find(f=>f.fecha===s)}function eventAt(s,p){return state.eventos.find(e=>e.fecha===s&&e.operario===p)}
-
 function specialKey(s){return s}
-
 function checked(s,p){return !!(state.trabajoEspecial[s]&&state.trabajoEspecial[s][p])}
-
 function setChecked(s,p,v){if(!state.trabajoEspecial[s])state.trabajoEspecial[s]={};state.trabajoEspecial[s][p]=v;saveState(false)}
-
 function renderSpecialDays(){const keys=monthKeys(state.mes);const days=keys.filter(s=>isSunday(s)||holiday(s));const el=$('specialDays');if(!days.length){el.innerHTML='<div class="empty">Este mes no tiene domingos ni feriados cargados.</div>';return}el.innerHTML=days.map(s=>{const h=holiday(s),title=`${pretty(s)} · ${weekday(s)}${h?' · '+h.nombre:''}`,linked=isSunday(s)?`Sábado vinculado: ${pretty(addDays(s,-1))}`:'';return `<div class="item"><div class="grow"><strong>${esc(title)}</strong><div class="help">${esc(linked||'Feriado configurado manualmente')}</div><div class="row" style="margin-top:7px">${OPERARIOS.map(p=>`<label class="inline" style="font-weight:500"><input type="checkbox" data-special-date="${s}" data-special-person="${p}" ${checked(s,p)?'checked':''}>${p}</label>`).join('')}</div></div></div>`}).join('');el.querySelectorAll('[data-special-date]').forEach(c=>c.addEventListener('change',()=>{setChecked(c.dataset.specialDate,c.dataset.specialPerson,c.checked);state.resultado=null}))}
-
 function renderHolidays(){const el=$('holidayList');el.innerHTML=state.feriados.length?state.feriados.slice().sort((a,b)=>a.fecha.localeCompare(b.fecha)).map(h=>`<div class="item"><div class="grow"><strong>${pretty(h.fecha)}</strong> — ${esc(h.nombre)}</div><button class="danger" data-del-holiday="${h.fecha}">Quitar</button></div>`).join(''):'<div class="empty">No agregaste feriados manuales.</div>';el.querySelectorAll('[data-del-holiday]').forEach(b=>b.onclick=()=>{state.feriados=state.feriados.filter(h=>h.fecha!==b.dataset.delHoliday);delete state.trabajoEspecial[b.dataset.delHoliday];state.resultado=null;renderAll();saveState(false)})}
-
 function renderEvents(){const el=$('eventList');el.innerHTML=state.eventos.length?state.eventos.slice().sort((a,b)=>a.fecha.localeCompare(b.fecha)).map((e,i)=>`<div class="item"><div class="grow"><strong>${pretty(e.fecha)} · ${esc(e.operario)}</strong> <span class="tag red">${esc(e.tipo)}</span><div>${esc(e.detalle||'Sin detalle')}</div></div><button class="danger" data-del-event="${i}">Quitar</button></div>`).join(''):'<div class="empty">No hay eventualidades cargadas.</div>';el.querySelectorAll('[data-del-event]').forEach(b=>b.onclick=()=>{state.eventos.splice(Number(b.dataset.delEvent),1);state.resultado=null;renderAll();saveState(false)})}
-
 function renderAll(){if(state.mes)$('mes').value=state.mes;$('eventoOperario').innerHTML=OPERARIOS.map(p=>`<option value="${p}">${p}</option>`).join('');const first=state.mes?state.mes+'-01':'';if(first&&!$('eventoFecha').value)$('eventoFecha').value=first;if(first&&!$('feriadoFecha').value)$('feriadoFecha').value=first;renderSpecialDays();renderHolidays();renderEvents()}
-
 function addHoliday(){const fecha=$('feriadoFecha').value,nombre=$('feriadoNombre').value.trim()||'Feriado';if(!fecha){alert('Elegí la fecha del feriado.');return}if(!state.mes||fecha.slice(0,7)!==state.mes){alert('La fecha debe pertenecer al mes seleccionado.');return}if(!state.feriados.some(h=>h.fecha===fecha))state.feriados.push({fecha,nombre});else state.feriados=state.feriados.map(h=>h.fecha===fecha?{fecha,nombre}:h);state.resultado=null;renderAll();saveState(false);$('feriadoNombre').value=''}
-
 function addEvent(){const fecha=$('eventoFecha').value,operario=$('eventoOperario').value,tipo=$('eventoTipo').value,detalle=$('eventoDetalle').value.trim();if(!fecha||!operario){alert('Completá fecha y operario.');return}if(!state.mes||fecha.slice(0,7)!==state.mes){alert('La eventualidad debe pertenecer al mes seleccionado.');return}state.eventos.push({fecha,operario,tipo,detalle});state.resultado=null;renderAll();saveState(false);$('eventoDetalle').value=''}
-
 function saveState(show){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));$('saveStatus').textContent=show?'Datos guardados en este navegador.':'Cambios guardados automáticamente.'}catch(e){$('saveStatus').textContent='No se pudieron guardar los datos en este navegador.'}}
-
 function loadState(){try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){const v=JSON.parse(raw);state={...state,...v};state.feriados=Array.isArray(state.feriados)?state.feriados:[];state.eventos=Array.isArray(state.eventos)?state.eventos:[];state.trabajoEspecial=state.trabajoEspecial||{}}}catch(e){console.warn('No se pudo recuperar el plan guardado',e)}}
-
 function isHoliday(s){return !!holiday(s)}
-
 function buildRules(keys){
-
  const off=new Map(),causes=new Map(),compensatory=[],unassigned=[];
-
  function ensure(map,s,p,init){if(!map.has(s))map.set(s,new Map());if(!map.get(s).has(p))map.get(s).set(p,init);return map.get(s).get(p)}
-
  function addOff(s,p,reason,meta={}){
-
   const arr=ensure(off,s,p,[]);
-
   if(!arr.some(x=>x.reason===reason&&x.origin===meta.origin&&x.originReason===meta.originReason))arr.push({reason,...meta});
-
   ensure(causes,s,p,[]).push({reason,...meta});
-
  }
-
  // El domingo trabajado genera su compensatorio del lunes y el fin de semana posterior libre.
-
  for(const s of keys){
-
   if(isSunday(s)){
-
    for(const p of OPERARIOS)if(checked(s,p)){
-
     const mon=addDays(s,1);
-
     addOff(mon,p,'Compensatorio por domingo trabajado',{origin:s,originReason:'Domingo trabajado',moved:false});
-
     addOff(addDays(s,6),p,'Descanso de fin de semana posterior',{origin:s,originReason:'Domingo trabajado',moved:false});
-
     addOff(addDays(s,7),p,'Descanso de fin de semana posterior',{origin:s,originReason:'Domingo trabajado',moved:false});
-
     compensatory.push({person:p,origin:s,reason:'Domingo trabajado',date:mon,kind:'sunday'});
-
    }
-
   }
-
  }
-
  // Los feriados de lunes a jueves generan compensatorios que se agrupan por persona y semana.
-
  const batches=new Map();
-
  for(const s of keys){
-
   if(!isHoliday(s)||isWeekend(s)||dow(s)<1||dow(s)>4)continue;
-
   for(const p of OPERARIOS){
-
    if(!checked(s,p))continue;
-
    const monday=addDays(s,1-dow(s));
-
    const batchKey=`${p}|${monday}`;
-
    if(!batches.has(batchKey))batches.set(batchKey,{person:p,week:monday,items:[]});
-
    batches.get(batchKey).items.push({person:p,origin:s,reason:`Feriado trabajado: ${holiday(s).nombre}`,kind:'holiday'});
-
   }
-
  }
-
  function weekendAlreadyFree(sat,sun,p){
-
   const selected=checked(sun,p);
-
   const forcedOff=[...(off.get(sat)?.get(p)||[]),...(off.get(sun)?.get(p)||[])].some(x=>x.reason==='Descanso de fin de semana posterior');
-
   return !selected||forcedOff;
-
  }
-
  function canUseCompDay(day,p){
-
   if(!keys.includes(day)||isWeekend(day)||isHoliday(day)||eventAt(day,p))return false;
-
   return !(off.get(day)?.get(p)||[]).length;
-
  }
-
  for(const batch of batches.values()){
-
   batch.items.sort((a,b)=>a.origin.localeCompare(b.origin));
-
   const p=batch.person;
-
   const latestOrigin=batch.items[batch.items.length-1].origin;
-
   const sundays=keys.filter(s=>isSunday(s)&&s>latestOrigin).sort();
-
   let placement=null;
-
   for(const sun of sundays){
-
    const sat=addDays(sun,-1);
-
    if(!weekendAlreadyFree(sat,sun,p))continue;
-
    const candidates=[];
-
    for(let day=addDays(sat,-1);day>latestOrigin;day=addDays(day,-1)){
-
     if(canUseCompDay(day,p))candidates.push(day);
-
     if(dow(day)===1)break;
-
    }
-
    if(candidates.length>=batch.items.length){placement={sun,dates:candidates.slice(0,batch.items.length)};break}
-
   }
-
   if(!placement){
-
    unassigned.push({person:p,origins:batch.items.map(x=>x.origin),reason:'No hay suficientes días hábiles compatibles antes de un fin de semana libre dentro del mes.'});
-
    continue;
-
   }
-
   // Los francos se colocan hacia atrás desde el viernes: viernes, jueves, miércoles...
-
   batch.items.forEach((item,i)=>{
-
    const day=placement.dates[i];
-
    const nominalFriday=addDays(item.origin,5-dow(item.origin));
-
    const moved=day!==nominalFriday;
-
    addOff(day,p,'Compensatorio por feriado trabajado',{origin:item.origin,originReason:item.reason,moved,movedFrom:moved?nominalFriday:undefined});
-
    compensatory.push({...item,date:day,moved,movedFrom:moved?nominalFriday:undefined});
-
   });
-
  }
-
  return{off,causes,compensatory,unassigned};
-
 }
-
 function slotSet(n){if(n===4)return[{start:6,end:12,label:'06:00–12:00'},{start:12,end:18,label:'12:00–18:00'},{start:18,end:24,label:'18:00–00:00'},{start:24,end:30,label:'00:00–06:00'}];if(n===3)return[{start:6,end:14,label:'06:00–14:00'},{start:14,end:22,label:'14:00–22:00'},{start:22,end:30,label:'22:00–06:00'}];if(n===2)return[{start:6,end:18,label:'06:00–18:00'},{start:18,end:30,label:'18:00–06:00'}];return[]}
-
 function allowed(p,s,prev){if(p==='Pace'&&s.end>18&&s.end<30)return false;if(p==='Videla'&&s.end>22&&s.end<30)return false;if(p==='Videla'&&s.start===6&&prev&&prev.end>18&&prev.end<30)return false;return true}
-
 function permutations(a){if(a.length<2)return[a.slice()];const out=[];a.forEach((v,i)=>permutations(a.filter((_,j)=>i!==j)).forEach(rest=>out.push([v,...rest])));return out}
-
 function makePlan(people,previous,forceNight){const slots=slotSet(people.length);if(!slots.length)return null;for(const perm of permutations(people)){const assignments=perm.map((p,i)=>({person:p,slot:slots[i]}));if(!assignments.every(a=>allowed(a.person,a.slot,previous.get(a.person))))continue;if(forceNight&&!assignments.some(a=>a.person===forceNight&&a.slot.start===slots[slots.length-1].start))continue;return assignments}return null}
-
 function calculate(){const keys=monthKeys(state.mes);if(!keys.length){alert('Elegí un mes.');return}const rules=buildRules(keys),plan={},alerts=[],previous=new Map(),nightRotation=state.trabajoEspecial.rotationLast==='Mansilla'?'Carrizo':'Mansilla';let nightNext=nightRotation;rules.unassigned.forEach(c=>alerts.push({type:'error',text:`No se pudo asignar el compensatorio de ${c.person} (orígenes: ${c.origins.map(pretty).join(', ')}). ${c.reason}`}));const offFor=(s,p)=>rules.off.get(s)?.get(p)||[];const isOff=(s,p)=>offFor(s,p).length>0;
-
 for(const s of keys){const wk=isWeekend(s),sun=wk?(isSunday(s)?s:addDays(s,1)):null;let available=OPERARIOS.filter(p=>!eventAt(s,p)&&!isOff(s,p));if(wk){const selected=OPERARIOS.filter(p=>checked(sun,p));available=selected.filter(p=>!eventAt(s,p)&&!isOff(s,p));if(!selected.length)available=[]}
-
 if(!wk&&available.length<2){alerts.push({type:'error',text:`Hay menos de dos operarios disponibles el ${pretty(s)}. Revisá los francos, feriados y eventualidades cargados.`})}
-
 if(isHoliday(s)){available=available.filter(p=>checked(s,p)&&!eventAt(s,p)&&!isOff(s,p))}
-
 let assignments=[];if(available.length>=2){let force=null;if(isSunday(s)||isHoliday(s)){force=nightNext;nightNext=nightNext==='Mansilla'?'Carrizo':'Mansilla'}const made=makePlan(available,previous,force);if(made)assignments=made;else{const fallback=makePlan(available,previous,null);if(fallback)assignments=fallback;alerts.push({type:'error',text:`No se pudo respetar toda la rotación/los límites horarios el ${pretty(s)}.`})}}else if(available.length===1){alerts.push({type:'error',text:`Solo queda ${available[0]} disponible el ${pretty(s)}; no se puede cubrir el esquema de turnos.`})}else if(!wk&&!isHoliday(s)&&OPERARIOS.some(p=>!eventAt(s,p)&&!isOff(s,p))){alerts.push({type:'error',text:`No se pudo asignar cobertura suficiente el ${pretty(s)}.`})}if(wk&&OPERARIOS.some(p=>checked(sun,p))&&available.length<2)alerts.push({type:'error',text:`Fin de semana ${pretty(s)}: hay menos de dos operarios disponibles entre los seleccionados para el domingo ${pretty(sun)}.`});const cells={};for(const p of OPERARIOS){const ev=eventAt(s,p);const off=offFor(s,p);const a=assignments.find(x=>x.person===p);let value='',kind='';if(ev){value=`${ev.tipo}${ev.detalle?': '+ev.detalle:''}`;kind='event'}else if(off.length){const c=off.find(x=>String(x.reason).toLowerCase().includes('compensatorio'));if(c){value=`FRANCO COMPENSATORIO\nOrigen: ${pretty(c.origin)}\nMotivo: ${c.originReason||c.reason}${c.moved?`\nReubicado desde: ${pretty(c.movedFrom)}`:''}`;kind='comp'}else{value=wk?'LIBRE':'FRANCO';kind='off'}}else if(a){value=a.slot.label;kind='shift';previous.set(p,a.slot)}else{value=wk?'LIBRE':'SIN TURNO';kind='off'}}plan[s]={cells,assignments,available:available.slice()};for(const p of OPERARIOS){const ev=eventAt(s,p),off=offFor(s,p),a=assignments.find(x=>x.person===p);let value='',kind='';if(ev){value=`${ev.tipo}${ev.detalle?': '+ev.detalle:''}`;kind='event'}else if(off.length){const c=off.find(x=>String(x.reason).toLowerCase().includes('compensatorio'));if(c){value=`FRANCO COMPENSATORIO\nOrigen: ${pretty(c.origin)}\nMotivo: ${c.originReason||c.reason}${c.moved?`\nReubicado desde: ${pretty(c.movedFrom)}`:''}`;kind='comp'}else{value=wk?'LIBRE':'FRANCO';kind='off'}}else if(a){value=a.slot.label;kind='shift'}else{value=wk?'LIBRE':'SIN TURNO';kind='off'}plan[s].cells[p]={value,kind};}}
-
 state.resultado={plan,alerts,keys};if(isSunday(keys[keys.length-1]))state.trabajoEspecial.rotationLast=nightNext;renderResult();saveState(false)}
-
 function renderResult(){const r=state.resultado;if(!r){$('result').innerHTML='<div class="empty">Elegí el mes y presioná «Calcular plan».</div>';return}let rows='';for(const s of r.keys){const cells=OPERARIOS.map(p=>{const c=r.plan[s].cells[p];return `<td class="${c.kind}" style="white-space:pre-line">${esc(c.value)}</td>`}).join('');rows+=`<tr><td><strong>${pretty(s)}</strong><br>${weekday(s)}${holiday(s)?'<br>🎌 '+esc(holiday(s).nombre):''}</td>${cells}</tr>`}$('result').innerHTML=`<table id="planTable"><thead><tr><th>Fecha</th>${OPERARIOS.map(p=>`<th>${p}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;const counts={shift:0,off:0,comp:0,event:0};let under=0;for(const s of r.keys){const working=r.plan[s].assignments.length;if(working<2)under++;for(const p of OPERARIOS){const k=r.plan[s].cells[p].kind;if(k==='shift')counts.shift++;else if(k==='off')counts.off++;else if(k==='comp')counts.comp++;else if(k==='event')counts.event++}}$('summary').innerHTML=`<div class="metric"><span class="muted">Turnos asignados</span><strong>${counts.shift}</strong></div><div class="metric"><span class="muted">Francos / libres</span><strong>${counts.off}</strong></div><div class="metric"><span class="muted">Compensatorios</span><strong>${counts.comp}</strong></div><div class="metric"><span class="muted">Eventualidades</span><strong>${counts.event}</strong></div><div class="metric"><span class="muted">Días con menos de 2</span><strong>${under}</strong></div>`;$('alerts').innerHTML=r.alerts.length?r.alerts.map(a=>`<div class="alert ${a.type==='error'?'error':''}">${esc(a.text)}</div>`).join(''):'<div class="tag green">Sin conflictos detectados por las reglas básicas.</div>'}
-
 function exportRows(){if(!state.resultado){alert('Primero calculá el plan.');return null}return [['Fecha','Día',...OPERARIOS],...state.resultado.keys.map(s=>[pretty(s),weekday(s),...OPERARIOS.map(p=>state.resultado.plan[s].cells[p].value)])]}
-
 function download(name,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
-
 function exportCSV(){const rows=exportRows();if(!rows)return;const csv=rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');download(`Macrodesk_plan_${state.mes}.csv`,'\ufeff'+csv,'text/csv;charset=utf-8')}
-
 function exportExcel(){const rows=exportRows();if(!rows)return;const csv=rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join('\t')).join('\r\n');download(`Macrodesk_plan_${state.mes}.xls`,'\ufeff'+csv,'application/vnd.ms-excel;charset=utf-8')}
-
 $('mes').addEventListener('change',()=>{state.mes=$('mes').value;state.resultado=null;$('eventoFecha').value=state.mes?state.mes+'-01':'';$('feriadoFecha').value=state.mes?state.mes+'-01':'';renderAll();saveState(false);$('result').innerHTML='<div class="empty">Mes actualizado. Presioná «Calcular plan» para generar el cronograma.'});$('calcularBtn').addEventListener('click',calculate);$('guardarBtn').addEventListener('click',()=>saveState(true));$('agregarFeriadoBtn').addEventListener('click',addHoliday);$('agregarEventoBtn').addEventListener('click',addEvent);$('excelBtn').addEventListener('click',exportExcel);$('csvBtn').addEventListener('click',exportCSV);$('imprimirBtn').addEventListener('click',()=>window.print());
-
 (function init(){const now=new Date();state.mes=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;loadState();if(!state.mes)state.mes=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;$('mes').value=state.mes;$('eventoFecha').value=state.mes+'-01';$('feriadoFecha').value=state.mes+'-01';renderAll();if(state.resultado&&state.resultado.keys){try{renderResult()}catch(e){state.resultado=null}}})();
-
 </script></body></html>
